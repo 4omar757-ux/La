@@ -1,0 +1,48 @@
+name: Fetch Riyadh OSM data
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install osmtogeojson
+        run: npm install -g osmtogeojson
+
+      - name: Query Overpass for the Kingdom Centre Tower area (Riyadh)
+        run: |
+          mkdir -p maps/riyadh
+          cat > /tmp/query.overpassql << 'EOF'
+          [out:json][timeout:60];
+          (
+            nwr(24.70808,46.67113,24.71508,46.67813);
+          );
+          out geom;
+          EOF
+          cp /tmp/query.overpassql maps/riyadh/riyadh.overpassql
+          curl -sS --fail -X POST -d @/tmp/query.overpassql "https://overpass-api.de/api/interpreter" -o /tmp/riyadh_raw.json
+          wc -c /tmp/riyadh_raw.json
+
+      - name: Convert to GeoJSON (osmtogeojson)
+        run: |
+          osmtogeojson /tmp/riyadh_raw.json > maps/riyadh/riyadh_osm.geojson
+          node -e "const d=require('./maps/riyadh/riyadh_osm.geojson'); console.log('features:', d.features.length);"
+
+      - name: Commit fetched data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add maps/riyadh/riyadh.overpassql maps/riyadh/riyadh_osm.geojson
+          git commit -m "Fetch real OSM data for the Riyadh (Kingdom Centre Tower) track area" || echo "nothing to commit"
+          git push
