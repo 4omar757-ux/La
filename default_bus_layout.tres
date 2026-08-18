@@ -1,3 +1,5 @@
 [gd_resource type="AudioBusLayout" format=3 uid="uid://bod2tbaupqjqs"]
 
 [resource]
+bus/0/name = "Master"
+bus/0/mute = true
