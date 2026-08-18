@@ -19,7 +19,7 @@ class MasabaqaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'مسابقة',
+      title: 'ق',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorSchemeSeed: const Color(0xFF6C5CE7),

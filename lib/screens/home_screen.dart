@@ -19,7 +19,7 @@ class HomeScreen extends StatelessWidget {
               const Icon(Icons.quiz_rounded, size: 64, color: Color(0xFF6C5CE7)),
               const SizedBox(height: 12),
               const Text(
-                'مسابقة',
+                'ق',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),

@@ -61,6 +61,9 @@ jobs:
           echo "--- resulting settings.gradle(.kts) ---"
           cat android/settings.gradle.kts 2>/dev/null || cat android/settings.gradle
 
+          # Show "ق" as the app name on the phone's home screen / app drawer.
+          sed -i 's/android:label="[^"]*"/android:label="ق"/' android/app/src/main/AndroidManifest.xml
+
       - name: Get dependencies
         run: flutter pub get
 
