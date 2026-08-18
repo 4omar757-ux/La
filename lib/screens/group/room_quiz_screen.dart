@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../data/sample_questions.dart';
 import '../../models/question.dart';
 import '../../services/room_service.dart';
 import '../../widgets/option_button.dart';
-import '../../widgets/countdown_bar.dart';
+import '../../widgets/clock_countdown.dart';
 import 'room_results_screen.dart';
 
 class RoomQuizScreen extends StatefulWidget {
@@ -78,13 +79,19 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
       final elapsed = DateTime.now().difference(_questionStarted!).inSeconds;
       final left = (_duration - elapsed).clamp(0, _duration);
       if (mounted) setState(() => _secondsLeft = left);
-      if (left <= 0 && widget.isHost && _closingIndex != _lastSeenIndex) {
-        _closingIndex = _lastSeenIndex;
-        _roomService.closeQuestionAndScore(
-          code: widget.code,
-          questionIndex: _lastSeenIndex,
-          scoringType: widget.scoringType,
-        );
+      if (left <= 0) {
+        HapticFeedback.mediumImpact();
+        if (widget.isHost && _closingIndex != _lastSeenIndex) {
+          _closingIndex = _lastSeenIndex;
+          _roomService.closeQuestionAndScore(
+            code: widget.code,
+            questionIndex: _lastSeenIndex,
+            scoringType: widget.scoringType,
+          );
+        }
+      } else {
+        SystemSound.play(SystemSoundType.click);
+        HapticFeedback.selectionClick();
       }
     });
   }
@@ -162,9 +169,11 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        CountdownBar(
-                          remainingFraction: _secondsLeft / _duration,
-                          secondsLeft: _secondsLeft,
+                        Center(
+                          child: ClockCountdown(
+                            secondsLeft: _secondsLeft,
+                            totalSeconds: _duration,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Text(

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../models/question.dart';
 import '../../services/firebase_status.dart';
 import '../../services/room_service.dart';
 import 'lobby_screen.dart';
 
 class GroupSetupScreen extends StatefulWidget {
   final GroupScoringType? initialType;
-  const GroupSetupScreen({super.key, required this.initialType});
+  final Difficulty difficulty;
+  const GroupSetupScreen({super.key, required this.initialType, required this.difficulty});
 
   @override
   State<GroupSetupScreen> createState() => _GroupSetupScreenState();
@@ -46,6 +48,7 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
       final playerId = _roomService.newPlayerId();
       final code = await _roomService.createRoom(
         scoringType: _scoringType,
+        difficulty: widget.difficulty,
         hostName: name,
         hostPlayerId: playerId,
       );
@@ -148,6 +151,11 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
             ),
             const SizedBox(height: 20),
             const Text('إنشاء غرفة جديدة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 4),
+            Text(
+              'مستوى الصعوبة: ${widget.difficulty.label}',
+              style: const TextStyle(color: Colors.grey),
+            ),
             const SizedBox(height: 8),
             SegmentedButton<GroupScoringType>(
               segments: const [

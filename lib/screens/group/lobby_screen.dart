@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../../models/question.dart';
 import '../../services/room_service.dart';
 import 'room_quiz_screen.dart';
 
@@ -65,6 +66,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 const SizedBox(height: 8),
                 Text(
                   scoringType == GroupScoringType.fastest ? 'الوضع: الأسرع يفوز' : 'الوضع: سباق الوقت',
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                Text(
+                  'الصعوبة: ${Difficulty.values.byName(roomData['difficulty'] as String).label}',
                   style: const TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 24),

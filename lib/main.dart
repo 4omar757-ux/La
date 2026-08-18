@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'services/firebase_status.dart';
 import 'screens/home_screen.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,11 +22,7 @@ class MasabaqaApp extends StatelessWidget {
     return MaterialApp(
       title: 'ق',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF6C5CE7),
-        useMaterial3: true,
-        brightness: Brightness.light,
-      ),
+      theme: AppTheme.light(),
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,

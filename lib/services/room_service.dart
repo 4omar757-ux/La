@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../data/sample_questions.dart';
+import '../models/question.dart';
 
 enum GroupScoringType { fastest, timed }
 
@@ -24,13 +25,12 @@ class RoomService {
 
   Future<String> createRoom({
     required GroupScoringType scoringType,
+    required Difficulty difficulty,
     required String hostName,
     required String hostPlayerId,
   }) async {
-    final questionIds = (List.of(sampleQuestions)..shuffle())
-        .take(roomQuestionCount)
-        .map((q) => q.id)
-        .toList();
+    final pool = sampleQuestions.where((q) => q.difficulty == difficulty).toList()..shuffle();
+    final questionIds = pool.take(roomQuestionCount).map((q) => q.id).toList();
 
     String code = '';
     DocumentReference<Map<String, dynamic>>? ref;
@@ -49,6 +49,7 @@ class RoomService {
 
     await ref.set({
       'scoringType': scoringType.name,
+      'difficulty': difficulty.name,
       'status': 'lobby',
       'questionIds': questionIds,
       'currentIndex': -1,

@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../data/sample_questions.dart';
 import '../models/question.dart';
 import '../widgets/option_button.dart';
-import '../widgets/countdown_bar.dart';
+import '../widgets/clock_countdown.dart';
 
 const int _secondsPerQuestion = 15;
 
 class SoloScreen extends StatefulWidget {
-  const SoloScreen({super.key});
+  final Difficulty difficulty;
+  const SoloScreen({super.key, required this.difficulty});
 
   @override
   State<SoloScreen> createState() => _SoloScreenState();
@@ -27,7 +29,8 @@ class _SoloScreenState extends State<SoloScreen> {
   @override
   void initState() {
     super.initState();
-    _questions = List.of(sampleQuestions)..shuffle();
+    _questions = sampleQuestions.where((q) => q.difficulty == widget.difficulty).toList()
+      ..shuffle();
     _totalTime.start();
     _startTimer();
   }
@@ -47,7 +50,11 @@ class _SoloScreenState extends State<SoloScreen> {
       });
       if (_secondsLeft <= 0) {
         timer.cancel();
+        HapticFeedback.mediumImpact();
         if (!_answered) _onAnswer(null);
+      } else {
+        SystemSound.play(SystemSoundType.click);
+        HapticFeedback.selectionClick();
       }
     });
   }
@@ -98,13 +105,16 @@ class _SoloScreenState extends State<SoloScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CountdownBar(
-              remainingFraction: _secondsLeft / _secondsPerQuestion,
-              secondsLeft: _secondsLeft.clamp(0, _secondsPerQuestion),
+            Center(
+              child: ClockCountdown(
+                secondsLeft: _secondsLeft.clamp(0, _secondsPerQuestion),
+                totalSeconds: _secondsPerQuestion,
+              ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Text(
               'النقاط: $_score',
+              textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
             ),
             const SizedBox(height: 16),
@@ -172,7 +182,6 @@ class _SoloResultsScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
-                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                     child: const Text('رجوع للرئيسية'),
                   ),
                 ),
