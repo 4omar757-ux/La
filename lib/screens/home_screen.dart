@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'solo_screen.dart';
 import 'group/group_setup_screen.dart';
+import '../services/room_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
