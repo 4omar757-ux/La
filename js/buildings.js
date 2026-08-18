@@ -1,0 +1,48 @@
+// تعريف أنواع المباني وتأثيرها على الاقتصاد
+const BUILDING_TYPES = {
+  house: {
+    id: "house",
+    name: "منزل",
+    icon: "🏠",
+    cost: 50,
+    populationCapacity: 4,
+    incomePerSec: 0,
+    happinessDelta: 0,
+  },
+  market: {
+    id: "market",
+    name: "سوق",
+    icon: "🏪",
+    cost: 150,
+    populationCapacity: 0,
+    incomePerSec: 3,
+    happinessDelta: 1,
+  },
+  mosque: {
+    id: "mosque",
+    name: "مسجد",
+    icon: "🕌",
+    cost: 100,
+    populationCapacity: 0,
+    incomePerSec: 0,
+    happinessDelta: 4,
+  },
+  factory: {
+    id: "factory",
+    name: "مصنع",
+    icon: "🏭",
+    cost: 300,
+    populationCapacity: 0,
+    incomePerSec: 9,
+    happinessDelta: -3,
+  },
+  park: {
+    id: "park",
+    name: "حديقة",
+    icon: "🌳",
+    cost: 80,
+    populationCapacity: 0,
+    incomePerSec: 0,
+    happinessDelta: 3,
+  },
+};

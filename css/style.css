@@ -1,0 +1,176 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Tahoma", "Segoe UI", sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 10px 20px;
+  background: #1e293b;
+  border-bottom: 2px solid #334155;
+  flex-wrap: wrap;
+}
+
+#topbar h1 {
+  font-size: 18px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+#city-switch {
+  display: flex;
+  gap: 8px;
+}
+
+.city-btn {
+  background: #334155;
+  color: #e2e8f0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.city-btn.active {
+  background: #16a34a;
+  color: white;
+}
+
+#stats {
+  margin-inline-start: auto;
+  display: flex;
+  gap: 18px;
+  font-size: 15px;
+}
+
+#main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+#sidebar {
+  width: 260px;
+  background: #1e293b;
+  padding: 16px;
+  overflow-y: auto;
+  border-inline-end: 2px solid #334155;
+}
+
+#sidebar h2 {
+  font-size: 16px;
+  margin-top: 0;
+}
+
+#building-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.building-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: right;
+}
+
+.building-card:hover {
+  border-color: #16a34a;
+}
+
+.building-card.selected {
+  border-color: #facc15;
+  background: #422006;
+}
+
+.building-card .icon {
+  font-size: 24px;
+}
+
+.building-card .info {
+  flex: 1;
+}
+
+.building-card .name {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.building-card .cost {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.building-card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+#hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 12px;
+}
+
+#cancel-build {
+  width: 100%;
+  background: #b91c1c;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+#cancel-build.hidden {
+  display: none;
+}
+
+#reset-city {
+  width: 100%;
+  background: #334155;
+  color: #e2e8f0;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#map {
+  flex: 1;
+  cursor: crosshair;
+}
+
+.city-marker-icon {
+  text-align: center;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.6));
+}
+
+.city-marker-icon .marker-emoji {
+  font-size: 26px;
+  line-height: 1;
+}
