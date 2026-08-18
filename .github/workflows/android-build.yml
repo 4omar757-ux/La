@@ -44,8 +44,12 @@ jobs:
             -e 's/minSdk flutter\.minSdkVersion/minSdk 23/' \
             -e 's/minSdk = flutter\.minSdkVersion/minSdk = 23/' \
             android/app/build.gradle
+          # Firebase's Kotlin stdlib requires a newer Kotlin Gradle plugin than the default template pins.
+          sed -i -E 's/(id "org\.jetbrains\.kotlin\.android" version )"[^"]+"/\1"2.1.0"/' android/settings.gradle
           echo "--- resulting build.gradle ---"
           cat android/app/build.gradle
+          echo "--- resulting settings.gradle ---"
+          cat android/settings.gradle
 
       - name: Get dependencies
         run: flutter pub get
