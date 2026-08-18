@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>هجولة - تفحيط على خرائط حقيقية</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <h1>🏁 هجولة</h1>
+      <div id="city-switch">
+        <button class="city-btn active" data-city="riyadh">الرياض</button>
+        <button class="city-btn" data-city="buraydah">بريدة</button>
+      </div>
+      <div id="stats">
+        <span title="السرعة">🏎️ <b id="stat-speed">0</b> كم/س</span>
+        <span title="نقاط الدريفت">💨 <b id="stat-score">0</b></span>
+      </div>
+    </header>
+
+    <div id="scene-wrap">
+      <canvas id="scene"></canvas>
+
+      <div id="loading" class="overlay">
+        <div class="loading-box">
+          <div class="spinner"></div>
+          <p id="loading-text">تحميل شوارع ومباني المدينة الحقيقية...</p>
+        </div>
+      </div>
+
+      <div id="error-box" class="overlay hidden">
+        <div class="loading-box">
+          <p>⚠️ تعذر تحميل بيانات الخريطة (يحتاج اتصال إنترنت لخدمة OpenStreetMap/Overpass).</p>
+          <button id="retry-btn">إعادة المحاولة</button>
+        </div>
+      </div>
+
+      <button id="reset-btn" title="إعادة السيارة لنقطة البداية">↩️</button>
+
+      <div id="controls">
+        <button id="handbrake-btn">🅿️ فرملة يد</button>
+        <div id="joystick">
+          <div id="joystick-knob"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/car.js"></script>
+  <script src="js/geometry.js"></script>
+  <script src="js/citydata.js"></script>
+  <script src="js/cities.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
