@@ -1,63 +1,78 @@
-# هجولة — لعبة تفحيط على خرائط حقيقية
+# هجولة (يعتمد على Open Street Kart)
 
-لعبة دريفت/سباق أركيدية حرة، فوق **شوارع حقيقية** بالرياض وبريدة —
-مو خريطة وهمية، الطريق نفسه بانحناءاته وتقاطعاته مأخوذ من بيانات
-OpenStreetMap الفعلية، والمباني المحيطة مجسّمة (3D) بارتفاعاتها التقريبية.
+هذا فرع (fork) لمشروع [Open Street Kart](https://github.com/Picorims/open-street-kart) الأصلي
+لـ Charly Schmidt (Picorims) ومساهمي المشروع، مرخّص بموجب Mozilla Public License 2.0.
+الهدف تطوير مضامير سباق حقيقية للرياض وبريدة فوق نفس محرك اللعبة، وإضافة طابع "هجولة/دريفت".
 
-## التقنية (مفتوحة المصدر بالكامل)
+المضمار الحالي (Orsay، فرنسا) هو المضمار الأصلي من المشروع المصدر، ونستخدمه أولًا للتأكد
+من نجاح سلسلة البناء (Godot → تصدير أندرويد → APK) قبل إضافة مضمار حقيقي جديد.
 
-- **[three.js](https://threejs.org/)** — محرك عرض ثلاثي الأبعاد (MIT)، مضمّن محليًا (`vendor/three/`).
-- **فيزياء دريفت مخصّصة** (`js/car.js`) — نموذج أركيدي بسيط (سرعة أمامية +
-  انزلاق جانبي منفصلين، وقبضة "grip" تتغيّر مع الفرملة اليدوية) بدل محرك
-  فيزياء ثلاثي الأبعاد ثقيل.
-- **[Overpass API](https://overpass-api.de/)** — يُستخدم وقت التشغيل (حي، من
-  متصفحك) لجلب شوارع ومباني منطقة اللعب الفعلية من OpenStreetMap. بيانات
-  الخريطة نفسها ليست مضمّنة بالمشروع (بيانات حية تُجلب عند كل تحميل)، ولازم
-  اتصال إنترنت.
+انظر [CHANGELOG.md](./CHANGELOG.md) لتاريخ التطوير الأصلي، وباقي هذا الملف لتوثيق ومصادر
+المشروع الأصلي كما هي.
 
-## التشغيل
+---
 
-```bash
-python3 -m http.server 8000
-```
+# Open Street Kart
 
-ثم افتح `http://localhost:8000` بمتصفح حديث يدعم WebGL واتصال إنترنت.
+An arcade kart game where you race in real life areas reconstructed from Open Street Map
 
-## طريقة اللعب
+![thumbnail](./thumbnail.png)
 
-- **التحكم**: عصا افتراضية أسفل يسار الشاشة (انعطاف + تسارع/تراجع)، أو لوحة
-  المفاتيح على الحاسب (أسهم أو WASD).
-- **فرملة اليد 🅿️**: اضغط مع الاستمرار مع الانعطاف لبدء الانزلاق (الدريفت) —
-  السيارة تفلت من قبضتها الجانبية وتنزلق بدل ما تلف بشكل عادي.
-- **النقاط 💨**: تتجمع تلقائيًا كل ما كانت السيارة "بوضع دريفت فعلي" (زاوية
-  انزلاق كبيرة + سرعة كافية) — كل ما زادت زاوية الانزلاق والسرعة، زادت
-  النقاط بشكل أسرع.
-- **آثار الإطارات**: خط أسود يتبع مسار الدريفت على الأرض.
-- اختر مدينة من الأعلى (الرياض / بريدة) لتحميل شبكة شوارع حقيقية مختلفة.
-- زر ↩️ أعلى اليسار يرجّع السيارة لنقطة البداية لو ضاعت أو انقلبت الاتجاهات.
+# Disclaimer
 
-> **الحركة حرة فوق شبكة الشوارع** (تقدر تطلع عن الطريق للأرض المجاورة) —
-> مافيه حواجز اصطدام أو فيزياء تصادم مع المباني في هذي النسخة الأولى، فقط
-> الشكل الحقيقي للشوارع كخلفية للعب.
+*I do not endorse the use or reuse of this project for the following purposes, which includes but is not limited to: harassment, hate, racism, xenophobia, antisemitism, homophobia, lgbtqia+ phobia, promotion of Gen AI for replacing jobs (in art in particular), promotion of facism or technofacism, discrimination against disabled people as well as minorities.*
 
-## البنية
+# Credits
+
+## Project
+
+### Software
 
 ```
-index.html              نقطة الدخول
-css/style.css             التنسيق وعناصر التحكم اللمسية
-js/car.js                  فيزياء الدريفت الأركيدية (مُختبرة بمعزل عن الرسم)
-js/geometry.js              توليد هندسة "شريط" الطريق من خط وسطه وعرضه
-js/citydata.js               جلب Overpass API وتحويل النتائج لشوارع/مبانٍ محلية
-js/cities.js                  المدن المتاحة (مركز + نصف قطر منطقة اللعب)
-js/main.js                    المشهد ثلاثي الأبعاد (three.js)، الكاميرا، الإدخال، النقاط
-vendor/three/                  مكتبة three.js مضمّنة محليًا (رخصة MIT)
+Open Street Kart is an arcade kart game where you race in real life areas reconstructed from Open Street Map
+Copyright (c) 2025-2026 Charly Schmidt aka Picorims<picorims.contact@gmail.com> and Open Street Kart contributors
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
 ```
 
-## أفكار للتطوير لاحقًا
+### Artistic assets (excluding third party assets like Road Generator add-on assets)
 
-- تصادم فعلي مع حواف الطريق/المباني بدل الحركة الحرة الكاملة.
-- نمط "تحدي وقت" أو نقاط تفتيش (checkpoints) على مسار محدد بدل الحرية الكاملة.
-- توسعة نصف قطر منطقة اللعب أو تحميل أجزاء جديدة من الخريطة تلقائيًا كل ما
-  ابتعدت السيارة عن المركز.
-- سيارات متعددة اللاعبين (تحتاج بنية مزامنة لحظية منفصلة).
-- نموذج سيارة أكثر تفصيلًا بدل الصناديق البسيطة الحالية.
+<a href="https://github.com/Picorims/open-street-kart">Open Street Kart textures, materials, music, sound, and other artistic assets</a> © 2025 by <a href="https://github.com/Picorims/open-street-kart">Picorims and Open Street Kart contributors (see notice on individual assets for the exact authors)</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+
+#### Milky Way
+
+<a href="https://www.eso.org/public/images/eso0932a/">The Milky Way panorama</a> by ESO/S. Brunier, licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> and used in original and modified forms.
+
+## Data
+
+### Elevation
+
+Elevation is generated from the ASTER dataset (ASTGTMV003) (https://terra.nasa.gov/data/aster-data).
+The source used is Earthdata Nasa service: https://www.earthdata.nasa.gov/data/catalog/lpcloud-astgtm-003#toc-citation
+
+NASA/METI/AIST/Japan Spacesystems and U.S./Japan ASTER Science Team. (2019). <i>ASTER Global Digital Elevation Model V003</i> [Data set]. NASA Land Processes Distributed Active Archive Center. https://doi.org/10.5067/ASTER/ASTGTM.003 Date Accessed: 2025-07-04
+
+### Geographical data, roads, etc.
+
+All other data is built from the OpenStreetMap database, fetched using the Overpass API.
+
+OpenStreetMap data is made available under the ODbL license, and copyright belongs to OSM contributors.
+For more information, see: https://www.openstreetmap.org/copyright
+
+## Addons
+
+Addons are used in this project. For more information, have a look at the `addons` directory, where each add-on specify their license.
+
+- Debug Draw 3D: MIT License
+- Road Generator: MIT License
+- Sky3D: MIT License
+
+# About past AI-usage
+
+AI has been used between somewhere around May 2025 until late March 2026, for fancy auto-completion of code and code reviews only.
+
+Shall community contributions occur in the future, I will do my best to avoid agentic and vibe-coded PRs from being accepted, even though it is impossible to guarantee no AI usage. The point being, if it is used as a purely technical tool and that the majority of the work is human, understood, with full responsibility taken, it is OK, because in that case I should not be able to notice anyways.
+
+**I will however *never* accept any usage of AI in artistic manners, which includes but is not limited to: 3D models, textures, SFX, music, shaders (especially critical to understand the code there), fonts. Offer for AI based translation will be refused as well.

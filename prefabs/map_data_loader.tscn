@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://b4tvjt47re5eq"]
+
+[ext_resource type="Script" uid="uid://dtcc8wa14fk13" path="res://prefabs/map_data_loader.gd" id="1_gur84"]
+[ext_resource type="Script" uid="uid://clrgqfab65qq1" path="res://scripts/osm_data_generator.gd" id="3_h0kh0"]
+[ext_resource type="Material" uid="uid://cex0ns0f8n1c6" path="res://materials/environment/road/asphalt/asphalt_v2.tres" id="4_sy242"]
+[ext_resource type="Script" uid="uid://dev8urf5n8g4g" path="res://scripts/boundaries_generator.gd" id="5_eypua"]
+[ext_resource type="Material" uid="uid://pk7bh6318xwy" path="res://materials/environment/building/render/render.tres" id="5_sy242"]
+
+[node name="MapDataLoader" type="Node3D" unique_id=1620468629]
+script = ExtResource("1_gur84")
+
+[node name="OSMDataGenerator" type="Node3D" parent="." unique_id=1840664451 node_paths=PackedStringArray("loader", "boundaries_generator", "elevation_generator")]
+script = ExtResource("3_h0kh0")
+loader = NodePath("..")
+boundaries_generator = NodePath("../BoundariesGenerator")
+elevation_generator = NodePath("")
+road_material = ExtResource("4_sy242")
+building_material = ExtResource("5_sy242")
+
+[node name="BoundariesGenerator" type="Node3D" parent="." unique_id=1241783884 node_paths=PackedStringArray("loader")]
+script = ExtResource("5_eypua")
+loader = NodePath("..")
