@@ -5,6 +5,9 @@ on:
     branches: [claude/marhaba-xw3rqm]
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 env:
   GODOT_VERSION: "4.6-stable"
   GODOT_VERSION_DIR: "4.6.stable"
