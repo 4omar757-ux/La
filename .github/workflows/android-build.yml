@@ -36,6 +36,8 @@ jobs:
         run: |
           flutter create --platforms=android --project-name masabaqa --org com.hijola /tmp/scaffold
           cp -r /tmp/scaffold/android ./android
+          # cloud_firestore requires minSdkVersion 23; the default template sets it lower.
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/' android/app/build.gradle
 
       - name: Get dependencies
         run: flutter pub get
