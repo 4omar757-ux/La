@@ -3,8 +3,11 @@ import 'solo_screen.dart';
 import 'group/group_setup_screen.dart';
 import 'difficulty_select_screen.dart';
 import 'settings_screen.dart';
-import '../models/question.dart';
+import 'mode_explanation_screen.dart';
 import '../services/room_service.dart';
+
+const _darkBg = Color(0xFF1D1B18);
+const _surface2 = Color(0xFF33302C);
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -33,14 +36,44 @@ class HomeScreen extends StatelessWidget {
     ));
   }
 
+  void _openExplanation(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+    required String title,
+    required List<String> steps,
+    required VoidCallback onStart,
+  }) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => ModeExplanationScreen(
+        icon: icon,
+        color: color,
+        title: title,
+        steps: steps,
+        onStart: onStart,
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _darkBg,
       appBar: AppBar(
-        title: Image.asset('assets/branding/qaf_logo.png', height: 34),
+        backgroundColor: _darkBg,
+        elevation: 0,
+        title: Image.asset(
+          'assets/branding/qaf_logo.png',
+          height: 30,
+          color: Colors.white,
+          colorBlendMode: BlendMode.srcIn,
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_rounded),
+            icon: const CircleAvatar(
+              backgroundColor: _surface2,
+              child: Icon(Icons.settings_rounded, size: 18, color: Color(0xFFE7B24B)),
+            ),
             tooltip: 'الإعدادات',
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => const SettingsScreen(),
@@ -48,102 +81,151 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 8),
-              const Text(
-                'اختر طريقة اللعب',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 28),
-              _ModeCard(
-                icon: Icons.bolt_rounded,
-                title: 'مجموعة - الأسرع يفوز',
-                subtitle: 'أول من يجاوب صح ياخذ أعلى نقاط',
-                onTap: () => _openGroup(context, GroupScoringType.fastest),
-              ),
-              const SizedBox(height: 14),
-              _ModeCard(
-                icon: Icons.timer_rounded,
-                title: 'مجموعة - سباق الوقت',
-                subtitle: 'كل من يجاوب صح قبل انتهاء الوقت ياخذ النقاط كاملة',
-                onTap: () => _openGroup(context, GroupScoringType.timed),
-              ),
-              const SizedBox(height: 14),
-              _ModeCard(
-                icon: Icons.person_rounded,
-                title: 'اللعب الفردي',
-                subtitle: 'العب لحالك مع عداد وقت',
-                onTap: () => _openSolo(context),
-              ),
-              const SizedBox(height: 14),
-              _ModeCard(
-                icon: Icons.public_rounded,
-                title: 'مجموعة عبر الإنترنت',
-                subtitle: 'العب مع أصدقاء بأي مكان عن طريق كود الغرفة',
-                onTap: () => _openGroup(context, null),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: Opacity(
-                  opacity: 0.28,
-                  child: Image.asset('assets/branding/qaf_logo.png', height: 44),
+      body: Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _KeyTile(
+                    color: const Color(0xFF2E5339),
+                    icon: Icons.bolt_rounded,
+                    label: 'الأسرع',
+                    onTap: () => _openExplanation(
+                      context,
+                      icon: Icons.bolt_rounded,
+                      color: const Color(0xFF2E5339),
+                      title: 'الأسرع يفوز',
+                      steps: const [
+                        'يدخل جميع اللاعبين نفس الغرفة، ويشوفون نفس السؤال بنفس اللحظة.',
+                        'أول لاعب يجاوب صح ياخذ ١٠ نقاط كاملة، والي بعده أقل، وهكذا.',
+                        'من يجاوب غلط أو ما يجاوب ما ياخذ نقاط على ذاك السؤال.',
+                      ],
+                      onStart: () => _openGroup(context, GroupScoringType.fastest),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                Container(width: 2, color: _darkBg),
+                Expanded(
+                  child: _KeyTile(
+                    color: const Color(0xFF8A3B2B),
+                    icon: Icons.timer_rounded,
+                    label: 'الوقت',
+                    onTap: () => _openExplanation(
+                      context,
+                      icon: Icons.timer_rounded,
+                      color: const Color(0xFF8A3B2B),
+                      title: 'سباق الوقت',
+                      steps: const [
+                        'يدخل جميع اللاعبين نفس الغرفة ويشوفون نفس السؤال بنفس اللحظة.',
+                        'كل من يجاوب صح قبل انتهاء وقت السؤال (١٥ ثانية) ياخذ ١٠ نقاط كاملة.',
+                        'ما فيه فرق بين الأول والأخير طالما جاوبوا ضمن الوقت.',
+                      ],
+                      onStart: () => _openGroup(context, GroupScoringType.timed),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          Container(height: 2, color: _darkBg),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _KeyTile(
+                    color: const Color(0xFF5B3E7A),
+                    icon: Icons.person_rounded,
+                    label: 'فردي',
+                    onTap: () => _openExplanation(
+                      context,
+                      icon: Icons.person_rounded,
+                      color: const Color(0xFF5B3E7A),
+                      title: 'اللعب الفردي',
+                      steps: const [
+                        'تلعب لحالك بدون منافسين.',
+                        'كل سؤال له عداد وقت خاص فيه.',
+                        'تشوف نتيجتك الكلية ووقتك في نهاية الجولة.',
+                      ],
+                      onStart: () => _openSolo(context),
+                    ),
+                  ),
+                ),
+                Container(width: 2, color: _darkBg),
+                Expanded(
+                  child: _KeyTile(
+                    color: const Color(0xFFB98424),
+                    icon: Icons.public_rounded,
+                    label: 'أونلاين',
+                    onTap: () => _openExplanation(
+                      context,
+                      icon: Icons.public_rounded,
+                      color: const Color(0xFFB98424),
+                      title: 'مجموعة عبر الإنترنت',
+                      steps: const [
+                        'أنشئ غرفة أو انضم لغرفة بكود مشترك من أي مكان.',
+                        'اختر نظام النقاط (الأسرع يفوز أو سباق الوقت).',
+                        'العب مع أصدقاءك حتى لو كل واحد بمكان مختلف.',
+                      ],
+                      onStart: () => _openGroup(context, null),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _ModeCard extends StatelessWidget {
+class _KeyTile extends StatelessWidget {
+  final Color color;
   final IconData icon;
-  final String title;
-  final String subtitle;
+  final String label;
   final VoidCallback onTap;
 
-  const _ModeCard({
+  const _KeyTile({
+    required this.color,
     required this.icon,
-    required this.title,
-    required this.subtitle,
+    required this.label,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+    return InkWell(
+      onTap: onTap,
+      child: Ink(
+        color: color,
+        child: SizedBox.expand(
+          child: Stack(
             children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: scheme.primaryContainer,
-                child: Icon(icon, color: scheme.onPrimaryContainer),
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.22), shape: BoxShape.circle),
+                  child: const Icon(Icons.info_outline_rounded, size: 13, color: Colors.white),
+                ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
+              Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 2),
-                    Text(subtitle, style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                    Icon(icon, color: Colors.white, size: 34),
+                    const SizedBox(height: 10),
+                    Text(
+                      label,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_left_rounded, color: Colors.grey),
             ],
           ),
         ),
