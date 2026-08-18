@@ -35,18 +35,31 @@ jobs:
         run: |
           flutter create --platforms=android --project-name masabaqa --org com.hijola /tmp/scaffold
           cp -r /tmp/scaffold/android ./android
+
+          # Recent Flutter templates use Kotlin DSL (build.gradle.kts) instead
+          # of Groovy (build.gradle) - find whichever one actually exists.
+          if [ -f android/app/build.gradle.kts ]; then
+            GRADLE_FILE=android/app/build.gradle.kts
+          else
+            GRADLE_FILE=android/app/build.gradle
+          fi
+          echo "Using $GRADLE_FILE"
+
           # cloud_firestore requires minSdkVersion 23; the default template sets it lower.
-          # Cover both the legacy Groovy syntax and the newer AGP property names.
+          # Cover Groovy, Kotlin DSL, and both "minSdkVersion"/"minSdk" property names.
           sed -i \
             -e 's/minSdkVersion flutter\.minSdkVersion/minSdkVersion 23/' \
             -e 's/minSdkVersion = flutter\.minSdkVersion/minSdkVersion = 23/' \
             -e 's/minSdk flutter\.minSdkVersion/minSdk 23/' \
             -e 's/minSdk = flutter\.minSdkVersion/minSdk = 23/' \
-            android/app/build.gradle
-          echo "--- resulting build.gradle ---"
-          cat android/app/build.gradle
-          echo "--- resulting settings.gradle ---"
-          cat android/settings.gradle
+            -e 's/minSdk = flutter\.minSdkVersion\.get()/minSdk = 23/' \
+            -e 's/minSdk = flutter\.minSdkVersion\.toInteger()/minSdk = 23/' \
+            "$GRADLE_FILE"
+
+          echo "--- resulting $GRADLE_FILE ---"
+          cat "$GRADLE_FILE"
+          echo "--- resulting settings.gradle(.kts) ---"
+          cat android/settings.gradle.kts 2>/dev/null || cat android/settings.gradle
 
       - name: Get dependencies
         run: flutter pub get
