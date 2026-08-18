@@ -1,0 +1,33 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "osk_boundary_type": "race" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-300, 0, -300],
+          [1100, 0, -300],
+          [1100, 0, 1100],
+          [-300, 0, 1100],
+          [-300, 0, -300]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "osk_boundary_type": "local_race_boundary" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-300, 0, -300],
+          [1100, 0, -300],
+          [1100, 0, 1100],
+          [-300, 0, 1100],
+          [-300, 0, -300]
+        ]]
+      }
+    }
+  ]
+}

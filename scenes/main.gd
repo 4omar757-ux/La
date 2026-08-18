@@ -34,11 +34,13 @@ enum Track {
 	NONE,
 	ORSAY_HILLS,
 	RIYADH_KINGDOM_CENTRE,
+	BURAYDAH_CENTRAL,
 }
 
 const TRACK_SCENES: Dictionary[Main.Track, PackedScene] = {
 	Track.ORSAY_HILLS: preload("res://scenes/races/orsay.tscn"),
 	Track.RIYADH_KINGDOM_CENTRE: preload("res://scenes/races/riyadh.tscn"),
+	Track.BURAYDAH_CENTRAL: preload("res://scenes/races/buraydah.tscn"),
 }
 
 var _current_background: _BackgroundKind = _BackgroundKind.UNSET
