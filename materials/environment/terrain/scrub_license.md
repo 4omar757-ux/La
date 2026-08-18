@@ -1,1 +1,0 @@
-Scrub Material - Picorims aka Charly Schmidt - 2026 - CC-BY-SA 4.0

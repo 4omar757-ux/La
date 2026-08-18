@@ -1,2 +1,0 @@
-Min Elevation: 34
-Max Elevation: 189
