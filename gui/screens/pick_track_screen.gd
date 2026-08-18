@@ -12,6 +12,7 @@ signal track_selected(mode: Main.Track)
 
 const TRACKS_DICTIONARY: Dictionary[String, Main.Track] = {
 	"Orsay Hills": Main.Track.ORSAY_HILLS,
+	"Riyadh - Kingdom Centre": Main.Track.RIYADH_KINGDOM_CENTRE,
 }
 
 func _ready() -> void:

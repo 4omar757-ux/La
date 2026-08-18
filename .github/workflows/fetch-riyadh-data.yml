@@ -44,8 +44,20 @@ jobs:
 
       - name: Convert to GeoJSON (osmtogeojson)
         run: |
-          osmtogeojson /tmp/riyadh_raw.json > maps/riyadh/riyadh_osm.geojson
-          node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('./maps/riyadh/riyadh_osm.geojson','utf8')); console.log('features:', d.features.length);"
+          osmtogeojson /tmp/riyadh_raw.json > /tmp/riyadh_osm_raw.geojson
+          # osk's osm_data_generator.gd expects an "@id" property (e.g. "way/12345");
+          # this osmtogeojson version emits it as plain "id" instead, so copy it over.
+          node -e "
+            const fs = require('fs');
+            const d = JSON.parse(fs.readFileSync('/tmp/riyadh_osm_raw.geojson', 'utf8'));
+            for (const f of d.features) {
+              if (f.properties && f.properties.id && !f.properties['@id']) {
+                f.properties['@id'] = f.properties.id;
+              }
+            }
+            fs.writeFileSync('maps/riyadh/riyadh_osm.geojson', JSON.stringify(d));
+            console.log('features:', d.features.length);
+          "
 
       - name: Commit fetched data
         run: |
