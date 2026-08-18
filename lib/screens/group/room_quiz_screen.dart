@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../data/sample_questions.dart';
 import '../../models/question.dart';
 import '../../services/room_service.dart';
+import '../../services/sound_service.dart';
 import '../../widgets/option_button.dart';
 import '../../widgets/clock_countdown.dart';
 import 'room_results_screen.dart';
@@ -80,6 +81,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
       final left = (_duration - elapsed).clamp(0, _duration);
       if (mounted) setState(() => _secondsLeft = left);
       if (left <= 0) {
+        SoundService.instance.playTimeUp();
         HapticFeedback.mediumImpact();
         if (widget.isHost && _closingIndex != _lastSeenIndex) {
           _closingIndex = _lastSeenIndex;
@@ -90,7 +92,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
           );
         }
       } else {
-        SystemSound.play(SystemSoundType.click);
+        SoundService.instance.playTick();
         HapticFeedback.selectionClick();
       }
     });

@@ -35,10 +35,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ق'),
+        title: Image.asset('assets/branding/qaf_logo.png', height: 34),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_rounded),
@@ -91,7 +90,10 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Center(
-                child: Icon(Icons.quiz_rounded, size: 40, color: scheme.primary.withValues(alpha: 0.35)),
+                child: Opacity(
+                  opacity: 0.28,
+                  child: Image.asset('assets/branding/qaf_logo.png', height: 44),
+                ),
               ),
             ],
           ),

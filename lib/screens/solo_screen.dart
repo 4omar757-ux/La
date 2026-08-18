@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../data/sample_questions.dart';
 import '../models/question.dart';
+import '../services/sound_service.dart';
 import '../widgets/option_button.dart';
 import '../widgets/clock_countdown.dart';
 
@@ -50,10 +51,11 @@ class _SoloScreenState extends State<SoloScreen> {
       });
       if (_secondsLeft <= 0) {
         timer.cancel();
+        SoundService.instance.playTimeUp();
         HapticFeedback.mediumImpact();
         if (!_answered) _onAnswer(null);
       } else {
-        SystemSound.play(SystemSoundType.click);
+        SoundService.instance.playTick();
         HapticFeedback.selectionClick();
       }
     });
