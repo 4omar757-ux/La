@@ -7,11 +7,17 @@ import '../models/city.dart';
 
 /// خريطة حقيقية (OpenStreetMap) قابلة للبناء عليها: تعرض المباني الموضوعة
 /// وتستدعي [onTap] عند الضغط على أي موقع (لبناء المبنى المختار هناك).
+/// تقبل [mapController] للتحكم البرمجي بالكاميرا (مثل متابعة سيارة أثناء القيادة)
+/// و [extraMarkers] لعلامات إضافية غير المباني (مثل السيارة نفسها).
 class CityMap extends StatelessWidget {
   final CityConfig city;
   final List<PlacedBuilding> buildings;
   final bool buildModeActive;
   final void Function(LatLng) onTap;
+  final MapController? mapController;
+  final List<Marker> extraMarkers;
+  final double? initialZoomOverride;
+  final bool interactive;
 
   const CityMap({
     super.key,
@@ -19,14 +25,22 @@ class CityMap extends StatelessWidget {
     required this.buildings,
     required this.buildModeActive,
     required this.onTap,
+    this.mapController,
+    this.extraMarkers = const [],
+    this.initialZoomOverride,
+    this.interactive = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return FlutterMap(
+      mapController: mapController,
       options: MapOptions(
         initialCenter: city.center,
-        initialZoom: city.zoom,
+        initialZoom: initialZoomOverride ?? city.zoom,
+        interactionOptions: InteractionOptions(
+          flags: interactive ? InteractiveFlag.all : InteractiveFlag.none,
+        ),
         onTap: (_, latLng) {
           if (buildModeActive) onTap(latLng);
         },
@@ -48,6 +62,7 @@ class CityMap extends StatelessWidget {
                   style: const TextStyle(fontSize: 24),
                 ),
               ),
+            ...extraMarkers,
           ],
         ),
       ],
