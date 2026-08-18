@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لعبة بناء المدن (3D) - الرياض وبريدة</title>
+<link rel="stylesheet" href="vendor/maplibre/maplibre-gl.css" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <h1>🏙️ لعبة بناء المدن — 3D</h1>
+      <div id="city-switch">
+        <button class="city-btn active" data-city="riyadh">الرياض</button>
+        <button class="city-btn" data-city="buraydah">بريدة</button>
+      </div>
+      <div id="stats">
+        <span title="الذهب">💰 <b id="stat-gold">0</b></span>
+        <span title="السكان">👥 <b id="stat-population">0</b>/<b id="stat-capacity">0</b></span>
+        <span title="السعادة">😊 <b id="stat-happiness">0</b>%</span>
+      </div>
+    </header>
+
+    <div id="main">
+      <aside id="sidebar">
+        <h2>المباني</h2>
+        <div id="building-palette"></div>
+        <p id="hint">اختر مبنى ثم اضغط على الخريطة لبنائه فوقها مجسّمًا</p>
+        <button id="cancel-build" class="hidden">إلغاء البناء ✖</button>
+        <hr>
+        <button id="reset-city">إعادة ضبط المدينة 🔄</button>
+      </aside>
+
+      <div id="map-wrap">
+        <div id="map"></div>
+
+        <div id="drive-speed" class="hidden">
+          <span id="speed-value">0</span> كم/س
+        </div>
+
+        <div id="joystick" class="hidden">
+          <div id="joystick-knob"></div>
+        </div>
+
+        <button id="mode-toggle" title="تبديل وضع القيادة">🚗</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/maplibre/maplibre-gl.js"></script>
+  <script src="js/cities.js"></script>
+  <script src="js/buildings.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/car.js"></script>
+  <script src="js/geo.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
