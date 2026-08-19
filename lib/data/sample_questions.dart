@@ -980,4 +980,34 @@ const List<Question> sampleQuestions = [
   Question(id: 'q298', text: 'أي من الآتي مختلف؟', options: ['بروتوكول كيوتو', 'اتفاقية باريس للمناخ', 'قمة ريو للأرض', 'الثورة الفرنسية'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى اتفاقيات وقمم بيئية عن المناخ، والثورة الفرنسية حدث سياسي.'),
   Question(id: 'q299', text: 'أي من الآتي مختلف؟', options: ['الرواقية', 'الوجودية', 'العدمية', 'الانطباعية'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى مدارس فلسفية، والانطباعية مدرسة فنية تشكيلية.'),
   Question(id: 'q300', text: 'أي من الآتي مختلف؟', options: ['الملكية', 'الجمهورية', 'الديكتاتورية', 'البرلمان'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى أنظمة حكم، والبرلمان مؤسسة تشريعية.'),
+
+  // ── مبتدئ (دفعة ٦ — تعويض المحذوف) ─────────────────────
+  Question(id: 'q301', text: 'أي من الآتي مختلف؟', options: ['القطار', 'الطائرة', 'السفينة', 'الشجرة'], correctIndex: 3, difficulty: Difficulty.beginner, explanation: 'الثلاثة الأولى وسائل نقل، والشجرة نبات.'),
+  Question(id: 'q302', text: 'أي من الآتي مختلف؟', options: ['الرياضيات', 'العلوم', 'اللغة العربية', 'الكرة'], correctIndex: 3, difficulty: Difficulty.beginner, explanation: 'الثلاثة الأولى مواد دراسية، والكرة أداة لعب.'),
+  Question(id: 'q303', text: 'أي من الآتي مختلف؟', options: ['غرفة النوم', 'المطبخ', 'الحمام', 'القطة'], correctIndex: 3, difficulty: Difficulty.beginner, explanation: 'الثلاثة الأولى غرف في المنزل، والقطة حيوان.'),
+  Question(id: 'q304', text: 'أي من الآتي مختلف؟', options: ['البرتقالي', 'البنفسجي', 'الوردي', 'الدائرة'], correctIndex: 3, difficulty: Difficulty.beginner, explanation: 'الثلاثة الأولى ألوان، والدائرة شكل هندسي.'),
+  Question(id: 'q305', text: 'أي من الآتي مختلف؟', options: ['النحلة', 'الصرصور', 'الخنفساء', 'العصفور'], correctIndex: 3, difficulty: Difficulty.beginner, explanation: 'الثلاثة الأولى حشرات، والعصفور طائر.'),
+  Question(id: 'q306', text: 'أي من الآتي مختلف؟', options: ['الطبل', 'الدف', 'الناي', 'الكرسي'], correctIndex: 3, difficulty: Difficulty.beginner, explanation: 'الثلاثة الأولى آلات موسيقية، والكرسي قطعة أثاث.'),
+  Question(id: 'q307', text: 'أي من الآتي مختلف؟', options: ['الخبز', 'الأرز', 'المعكرونة', 'الكرسي'], correctIndex: 3, difficulty: Difficulty.beginner, explanation: 'الثلاثة الأولى أطعمة نشوية، والكرسي قطعة أثاث.'),
+  Question(id: 'q308', text: 'أي من الآتي مختلف؟', options: ['الأب', 'الأم', 'الجد', 'الكرة'], correctIndex: 3, difficulty: Difficulty.beginner, explanation: 'الثلاثة الأولى أفراد من العائلة، والكرة أداة لعب.'),
+
+  // ── متوسط (دفعة ٦ — تعويض المحذوف) ─────────────────────
+  Question(id: 'q309', text: 'أي من الآتي مختلف؟', options: ['طوكيو', 'سيول', 'بكين', 'سيدني'], correctIndex: 3, difficulty: Difficulty.intermediate, explanation: 'الثلاثة الأولى عواصم آسيوية، وسيدني أكبر مدن أستراليا وليست عاصمتها (العاصمة كانبيرا).'),
+  Question(id: 'q310', text: 'أي من الآتي مختلف؟', options: ['الأرانب', 'الغزلان', 'الظباء', 'الذئاب'], correctIndex: 3, difficulty: Difficulty.intermediate, explanation: 'الثلاثة الأولى حيوانات عاشبة، والذئاب حيوانات مفترسة لاحمة.'),
+  Question(id: 'q311', text: 'أي من الآتي مختلف؟', options: ['كرة اليد', 'الرغبي', 'الهوكي', 'الشطرنج'], correctIndex: 3, difficulty: Difficulty.intermediate, explanation: 'الثلاثة الأولى رياضات جماعية بدنية، والشطرنج لعبة ذهنية فردية.'),
+  Question(id: 'q312', text: 'أي من الآتي مختلف؟', options: ['المحامي', 'القاضي', 'المدعي العام', 'النجار'], correctIndex: 3, difficulty: Difficulty.intermediate, explanation: 'الثلاثة الأولى مهن قانونية، والنجار حرفة يدوية.'),
+  Question(id: 'q313', text: 'أي من الآتي مختلف؟', options: ['الروبية الهندية', 'البات التايلندي', 'الرينغيت الماليزي', 'نيودلهي'], correctIndex: 3, difficulty: Difficulty.intermediate, explanation: 'الثلاثة الأولى أسماء عملات آسيوية، ونيودلهي اسم مدينة (عاصمة الهند).'),
+  Question(id: 'q314', text: 'أي من الآتي مختلف؟', options: ['التلغراف', 'الهاتف', 'الراديو', 'شجرة النخيل'], correctIndex: 3, difficulty: Difficulty.intermediate, explanation: 'الثلاثة الأولى وسائل اتصال واختراعات، وشجرة النخيل نبات.'),
+  Question(id: 'q315', text: 'أي من الآتي مختلف؟', options: ['نهر السين', 'نهر التايمز', 'نهر الفولغا', 'جبال الأورال'], correctIndex: 3, difficulty: Difficulty.intermediate, explanation: 'الثلاثة الأولى أنهار أوروبية، وجبال الأورال سلسلة جبلية.'),
+  Question(id: 'q316', text: 'أي من الآتي مختلف؟', options: ['البيسبول', 'الكريكيت', 'الغولف', 'المصارعة'], correctIndex: 3, difficulty: Difficulty.intermediate, explanation: 'الثلاثة الأولى رياضات تُلعب بأداة مثل مضرب أو عصا، والمصارعة رياضة تلامس جسدي مباشر بلا أداة.'),
+  Question(id: 'q317', text: 'أي من الآتي مختلف؟', options: ['الكهرباء الساكنة', 'التيار الكهربائي', 'المغناطيسية', 'الضغط الجوي'], correctIndex: 3, difficulty: Difficulty.intermediate, explanation: 'الثلاثة الأولى ظواهر كهرومغناطيسية، والضغط الجوي ظاهرة مرتبطة بالغلاف الجوي.'),
+  Question(id: 'q318', text: 'أي من الآتي مختلف؟', options: ['غزة', 'أريحا', 'بيت لحم', 'دمشق'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى مدن فلسطينية، ودمشق عاصمة سوريا.'),
+
+  // ── صعب (دفعة ٦ — تعويض المحذوف) ────────────────────────
+  Question(id: 'q319', text: 'أي من الآتي مختلف؟', options: ['نظرية دارون للتطور', 'نظرية الانفجار الكبير', 'نظرية النسبية', 'نظرية فيثاغورس'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى نظريات علمية في الفيزياء وعلم الأحياء والكونيات، ونظرية فيثاغورس نظرية رياضية هندسية.'),
+  Question(id: 'q320', text: 'أي من الآتي مختلف؟', options: ['هرقل', 'زيوس', 'بوسيدون', 'رمسيس الثاني'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى شخصيات من الأساطير اليونانية، ورمسيس الثاني فرعون مصري حقيقي.'),
+  Question(id: 'q321', text: 'أي من الآتي مختلف؟', options: ['فيثاغورس', 'إقليدس', 'الخوارزمي', 'هيرودوت'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى علماء رياضيات، وهيرودوت مؤرخ يوناني يُلقب بأبي التاريخ.'),
+  Question(id: 'q322', text: 'أي من الآتي مختلف؟', options: ['اتفاقية جنيف', 'ميثاق الأمم المتحدة', 'الإعلان العالمي لحقوق الإنسان', 'قناة بنما'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى وثائق ومعاهدات قانونية دولية، وقناة بنما ممر مائي.'),
+  Question(id: 'q323', text: 'أي من الآتي مختلف؟', options: ['بحيرة بايكال', 'بحيرة سوبيريور', 'بحر قزوين', 'الصحراء الكبرى'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى من أكبر البحيرات في العالم، والصحراء الكبرى منطقة صحراوية.'),
+  Question(id: 'q324', text: 'أي من الآتي مختلف؟', options: ['الإمام تركي بن عبدالله', 'الإمام فيصل بن تركي', 'الإمام عبدالله بن فيصل', 'نابليون بونابرت'], correctIndex: 3, difficulty: Difficulty.hard, explanation: 'الثلاثة الأولى أئمة من الدولة السعودية الثانية، ونابليون قائد فرنسي.'),
 ];
