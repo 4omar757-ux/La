@@ -4,14 +4,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String _volumePrefKey = 'sound_volume';
 const double _defaultVolume = 1.0;
 
-/// أصوات المؤقت. نستخدم ملفات صوتية حقيقية بدل SystemSound.play لأنه غير
+/// أصوات التطبيق. نستخدم ملفات صوتية حقيقية بدل SystemSound.play لأنه غير
 /// موثوق على أندرويد (يعتمد على إعداد "أصوات اللمس" بالنظام وغالباً صامت).
 class SoundService {
   SoundService._();
   static final SoundService instance = SoundService._();
 
-  final AudioPlayer _tickPlayer = AudioPlayer(playerId: 'tick');
-  final AudioPlayer _timeUpPlayer = AudioPlayer(playerId: 'time_up');
+  final Map<String, AudioPlayer> _players = {
+    'tick': AudioPlayer(playerId: 'tick'),
+    'time_up': AudioPlayer(playerId: 'time_up'),
+    'correct': AudioPlayer(playerId: 'correct'),
+    'wrong': AudioPlayer(playerId: 'wrong'),
+    'celebration': AudioPlayer(playerId: 'celebration'),
+  };
   bool _ready = false;
   double _volume = _defaultVolume;
 
@@ -19,18 +24,19 @@ class SoundService {
 
   Future<void> init() async {
     if (_ready) return;
-    await _tickPlayer.setReleaseMode(ReleaseMode.stop);
-    await _timeUpPlayer.setReleaseMode(ReleaseMode.stop);
-    await _tickPlayer.setSource(AssetSource('sounds/tick.wav'));
-    await _timeUpPlayer.setSource(AssetSource('sounds/time_up.wav'));
+    for (final entry in _players.entries) {
+      await entry.value.setReleaseMode(ReleaseMode.stop);
+      await entry.value.setSource(AssetSource('sounds/${entry.key}.wav'));
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       _volume = prefs.getDouble(_volumePrefKey) ?? _defaultVolume;
     } catch (_) {
       _volume = _defaultVolume;
     }
-    await _tickPlayer.setVolume(_volume);
-    await _timeUpPlayer.setVolume(_volume);
+    for (final player in _players.values) {
+      await player.setVolume(_volume);
+    }
     _ready = true;
   }
 
@@ -40,8 +46,9 @@ class SoundService {
   Future<void> setVolume(double value) async {
     _volume = value.clamp(0.0, 1.0);
     await init();
-    await _tickPlayer.setVolume(_volume);
-    await _timeUpPlayer.setVolume(_volume);
+    for (final player in _players.values) {
+      await player.setVolume(_volume);
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble(_volumePrefKey, _volume);
@@ -50,21 +57,20 @@ class SoundService {
     }
   }
 
-  Future<void> playTick() async {
+  Future<void> _play(String key) async {
     try {
       await init();
-      await _tickPlayer.seek(Duration.zero);
-      await _tickPlayer.resume();
+      final player = _players[key]!;
+      await player.seek(Duration.zero);
+      await player.resume();
     } catch (_) {
-      // تجاهل أي خطأ صوت حتى لا يعطل عداد الوقت
+      // تجاهل أي خطأ صوت حتى لا يعطل تدفق اللعبة
     }
   }
 
-  Future<void> playTimeUp() async {
-    try {
-      await init();
-      await _timeUpPlayer.seek(Duration.zero);
-      await _timeUpPlayer.resume();
-    } catch (_) {}
-  }
+  Future<void> playTick() => _play('tick');
+  Future<void> playTimeUp() => _play('time_up');
+  Future<void> playCorrect() => _play('correct');
+  Future<void> playWrong() => _play('wrong');
+  Future<void> playCelebration() => _play('celebration');
 }

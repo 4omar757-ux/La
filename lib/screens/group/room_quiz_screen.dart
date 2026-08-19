@@ -34,6 +34,10 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
   int _lastSeenIndex = -1;
   int? _selected;
   bool _answeredThisQuestion = false;
+  // true بمجرد ما اللاعب يجاوب أو ينتهي الوقت — نبيّن له وقتها الإجابة
+  // الصحيحة والسبب مباشرة (زي الفردي بالضبط)، بدل ما ينتظر لين تنتهي
+  // المسابقة كلها ليشوف كان صح ولا غلط.
+  bool _revealed = false;
   int _closingIndex = -1; // آخر سؤال طلب المضيف إغلاقه (يمنع التكرار)
   DateTime? _questionStarted;
   int _secondsLeft = 0;
@@ -68,6 +72,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
       _lastSeenIndex = index;
       _answeredThisQuestion = false;
       _selected = null;
+      _revealed = false;
       _questionStarted = startedAtTs?.toDate();
       _restartTicker();
     } else if (_questionStarted == null && startedAtTs != null) {
@@ -91,6 +96,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
       if (left <= 0) {
         SoundService.instance.playTimeUp();
         HapticFeedback.mediumImpact();
+        if (!_revealed && mounted) setState(() => _revealed = true);
         if (widget.isHost && _closingIndex != _lastSeenIndex) {
           _closingIndex = _lastSeenIndex;
           _roomService.closeQuestionAndScore(
@@ -123,11 +129,18 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
   }
 
   Future<void> _onAnswer(int optionIndex, Question question) async {
-    if (_answeredThisQuestion) return;
+    if (_revealed) return;
+    final correct = optionIndex == question.correctIndex;
     setState(() {
       _answeredThisQuestion = true;
       _selected = optionIndex;
+      _revealed = true;
     });
+    if (correct) {
+      SoundService.instance.playCorrect();
+    } else {
+      SoundService.instance.playWrong();
+    }
     await _roomService.submitAnswer(
       code: widget.code,
       questionIndex: _lastSeenIndex,
@@ -200,20 +213,63 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
                         for (int i = 0; i < question.options.length; i++) ...[
                           OptionButton(
                             label: question.options[i],
-                            state: _selected == i ? OptionState.selected : OptionState.idle,
-                            onTap: _answeredThisQuestion ? null : () => _onAnswer(i, question),
+                            state: !_revealed
+                                ? (_selected == i ? OptionState.selected : OptionState.idle)
+                                : i == question.correctIndex
+                                    ? OptionState.correct
+                                    : i == _selected
+                                        ? OptionState.wrong
+                                        : OptionState.idle,
+                            onTap: _revealed ? null : () => _onAnswer(i, question),
                           ),
                           const SizedBox(height: 12),
                         ],
-                        if (_answeredThisQuestion)
+                        if (_revealed) ...[
+                          if (!_answeredThisQuestion)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 4, bottom: 8),
+                              child: Text(
+                                'انتهى الوقت قبل ما تجاوب',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          if (question.explanation != null)
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'السبب',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    question.explanation!,
+                                    style: const TextStyle(fontSize: 14, height: 1.5),
+                                  ),
+                                ],
+                              ),
+                            ),
                           const Padding(
                             padding: EdgeInsets.only(top: 8),
                             child: Text(
-                              'تم إرسال إجابتك، بانتظار البقية...',
+                              'بانتظار انتقال الجميع للسؤال التالي...',
                               textAlign: TextAlign.center,
                               style: TextStyle(color: Colors.grey),
                             ),
                           ),
+                        ],
                       ],
                     ),
                   );

@@ -49,13 +49,26 @@ class OptionButton extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           elevation: 0,
         ),
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-            textAlign: TextAlign.right,
-          ),
+        child: Row(
+          children: [
+            // أيقونة صح/خطأ جنب اللون، حتى توصل الحالة حتى بدون تمييز
+            // الألوان (مثلاً عند عمى الألوان الأحمر/الأخضر).
+            if (state == OptionState.correct || state == OptionState.wrong) ...[
+              Icon(
+                state == OptionState.correct ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+            ],
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
         ),
       ),
     );

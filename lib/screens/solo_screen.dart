@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../data/sample_questions.dart';
 import '../models/question.dart';
 import '../services/sound_service.dart';
+import '../services/score_history_service.dart';
 import '../widgets/option_button.dart';
 import '../widgets/clock_countdown.dart';
 
@@ -75,6 +76,11 @@ class _SoloScreenState extends State<SoloScreen> {
       _selected = optionIndex;
       if (correct) _score += 10;
     });
+    if (correct) {
+      SoundService.instance.playCorrect();
+    } else {
+      SoundService.instance.playWrong();
+    }
     // إذا السؤال فيه توضيح/سبب، ننتظر ضغطة "التالي" حتى يقدر يقرأه بدل ما
     // ننتقل تلقائياً بسرعة.
     if (question.explanation == null) {
@@ -87,11 +93,18 @@ class _SoloScreenState extends State<SoloScreen> {
     _navigatingAway = true;
     if (_index >= _questions.length - 1) {
       _totalTime.stop();
+      ScoreHistoryService.instance.addResult(
+        difficulty: widget.difficulty,
+        score: _score,
+        total: _questions.length,
+      );
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => _SoloResultsScreen(
           score: _score,
           total: _questions.length,
           elapsed: _totalTime.elapsed,
+          difficulty: widget.difficulty,
+          questionCount: widget.questionCount,
         ),
       ));
       return;
@@ -191,20 +204,41 @@ class _SoloScreenState extends State<SoloScreen> {
   }
 }
 
-class _SoloResultsScreen extends StatelessWidget {
+class _SoloResultsScreen extends StatefulWidget {
   final int score;
   final int total;
   final Duration elapsed;
+  final Difficulty difficulty;
+  final int questionCount;
 
   const _SoloResultsScreen({
     required this.score,
     required this.total,
     required this.elapsed,
+    required this.difficulty,
+    required this.questionCount,
   });
 
   @override
+  State<_SoloResultsScreen> createState() => _SoloResultsScreenState();
+}
+
+class _SoloResultsScreenState extends State<_SoloResultsScreen> {
+  ScoreHistoryEntry? _best;
+
+  @override
+  void initState() {
+    super.initState();
+    SoundService.instance.playCelebration();
+    ScoreHistoryService.instance.bestFor(widget.difficulty).then((best) {
+      if (mounted) setState(() => _best = best);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final maxScore = total * 10;
+    final maxScore = widget.total * 10;
+    final isNewBest = _best != null && widget.score >= _best!.score && widget.total == _best!.total;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -217,16 +251,46 @@ class _SoloResultsScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 const Text('انتهت المسابقة!', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
-                Text('نتيجتك: $score / $maxScore', style: const TextStyle(fontSize: 20)),
+                Text('نتيجتك: ${widget.score} / $maxScore', style: const TextStyle(fontSize: 20)),
                 const SizedBox(height: 6),
                 Text(
-                  'الوقت الكلي: ${elapsed.inMinutes} د ${elapsed.inSeconds % 60} ث',
+                  'الوقت الكلي: ${widget.elapsed.inMinutes} د ${widget.elapsed.inSeconds % 60} ث',
                   style: const TextStyle(fontSize: 16, color: Colors.grey),
                 ),
+                if (_best != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    isNewBest
+                        ? 'أفضل نتيجة لك بهذا المستوى! 🎉'
+                        : 'أفضل نتيجة سابقة (${widget.difficulty.label}): ${_best!.score} / ${_best!.total * 10}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isNewBest ? Colors.amber.shade800 : Colors.grey,
+                      fontWeight: isNewBest ? FontWeight.bold : FontWeight.normal,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
+                    onPressed: () {
+                      if (!ModalRoute.of(context)!.isCurrent) return;
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (_) => SoloScreen(
+                          difficulty: widget.difficulty,
+                          questionCount: widget.questionCount,
+                        ),
+                      ));
+                    },
+                    child: const Text('العب مرة ثانية'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
                     onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
                     child: const Text('رجوع للرئيسية'),
                   ),
