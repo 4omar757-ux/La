@@ -13,7 +13,11 @@ const int fastestModeMaxSeconds = 20;
 /// كل سؤال وحساب النقاط (لا توجد Cloud Functions في هذا الإصدار)، لذلك يجب
 /// أن يبقى تطبيق المضيف مفتوحاً طوال المسابقة.
 class RoomService {
-  final _db = FirebaseFirestore.instance;
+  // late: تأجيل الوصول إلى FirebaseFirestore.instance حتى أول استخدام فعلي،
+  // لأن الوصول إليه مبكراً (مثلاً بمجرد إنشاء RoomService) يرمي استثناء إذا
+  // Firebase.initializeApp() ما استُدعي بعد — وهذا يصير دايماً قبل التحقق
+  // من firebaseReady، فيسبب شاشة فارغة بدل رسالة "يحتاج إعداد Firebase".
+  late final FirebaseFirestore _db = FirebaseFirestore.instance;
   final _rand = Random();
 
   String _randomId(int length) {
