@@ -7,7 +7,13 @@ import 'lobby_screen.dart';
 class GroupSetupScreen extends StatefulWidget {
   final GroupScoringType? initialType;
   final Difficulty difficulty;
-  const GroupSetupScreen({super.key, required this.initialType, required this.difficulty});
+  final int questionCount;
+  const GroupSetupScreen({
+    super.key,
+    required this.initialType,
+    required this.difficulty,
+    required this.questionCount,
+  });
 
   @override
   State<GroupSetupScreen> createState() => _GroupSetupScreenState();
@@ -49,6 +55,7 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
       final code = await _roomService.createRoom(
         scoringType: _scoringType,
         difficulty: widget.difficulty,
+        questionCount: widget.questionCount,
         hostName: name,
         hostPlayerId: playerId,
       );
@@ -153,7 +160,7 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
             const Text('إنشاء غرفة جديدة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 4),
             Text(
-              'مستوى الصعوبة: ${widget.difficulty.label}',
+              'مستوى الصعوبة: ${widget.difficulty.label} • عدد الأسئلة: ${widget.questionCount}',
               style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 8),

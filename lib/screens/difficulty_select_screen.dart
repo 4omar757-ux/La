@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import '../models/question.dart';
 
-class DifficultySelectScreen extends StatelessWidget {
-  final void Function(Difficulty) onSelected;
+const List<int> questionCountOptions = [10, 20, 30, 50];
+const int defaultQuestionCount = 10;
+
+class DifficultySelectScreen extends StatefulWidget {
+  final void Function(Difficulty difficulty, int questionCount) onSelected;
 
   const DifficultySelectScreen({super.key, required this.onSelected});
+
+  @override
+  State<DifficultySelectScreen> createState() => _DifficultySelectScreenState();
+}
+
+class _DifficultySelectScreenState extends State<DifficultySelectScreen> {
+  int _questionCount = defaultQuestionCount;
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +25,23 @@ class DifficultySelectScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Text('عدد الأسئلة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 10),
+            SegmentedButton<int>(
+              segments: [
+                for (final c in questionCountOptions) ButtonSegment(value: c, label: Text('$c')),
+              ],
+              selected: {_questionCount},
+              onSelectionChanged: (s) => setState(() => _questionCount = s.first),
+            ),
+            const SizedBox(height: 24),
+            const Text('مستوى الصعوبة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 10),
             for (final d in Difficulty.values) ...[
               _DifficultyCard(
                 difficulty: d,
                 onTap: () {
-                  if (ModalRoute.of(context)!.isCurrent) onSelected(d);
+                  if (ModalRoute.of(context)!.isCurrent) widget.onSelected(d, _questionCount);
                 },
               ),
               const SizedBox(height: 14),

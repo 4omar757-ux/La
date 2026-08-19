@@ -6,7 +6,6 @@ import '../models/question.dart';
 
 enum GroupScoringType { fastest, timed }
 
-const int roomQuestionCount = 10;
 const int timedModeSeconds = 15;
 const int fastestModeMaxSeconds = 20;
 
@@ -42,11 +41,12 @@ class RoomService {
   Future<String> createRoom({
     required GroupScoringType scoringType,
     required Difficulty difficulty,
+    required int questionCount,
     required String hostName,
     required String hostPlayerId,
   }) async {
     final pool = sampleQuestions.where((q) => q.difficulty == difficulty).toList()..shuffle();
-    final questionIds = pool.take(roomQuestionCount).map((q) => q.id).toList();
+    final questionIds = pool.take(questionCount).map((q) => q.id).toList();
 
     String? code;
     for (var attempt = 0; attempt < 10 && code == null; attempt++) {

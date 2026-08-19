@@ -11,7 +11,8 @@ const int _secondsPerQuestion = 15;
 
 class SoloScreen extends StatefulWidget {
   final Difficulty difficulty;
-  const SoloScreen({super.key, required this.difficulty});
+  final int questionCount;
+  const SoloScreen({super.key, required this.difficulty, required this.questionCount});
 
   @override
   State<SoloScreen> createState() => _SoloScreenState();
@@ -31,11 +32,10 @@ class _SoloScreenState extends State<SoloScreen> {
   @override
   void initState() {
     super.initState();
-    _questions = sampleQuestions
-        .where((q) => q.difficulty == widget.difficulty)
+    _questions = (sampleQuestions.where((q) => q.difficulty == widget.difficulty).toList()..shuffle())
+        .take(widget.questionCount)
         .map((q) => q.shuffled())
-        .toList()
-      ..shuffle();
+        .toList();
     _totalTime.start();
     _startTimer();
   }
