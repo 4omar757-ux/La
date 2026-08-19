@@ -67,6 +67,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   playerId: widget.playerId,
                   isHost: widget.isHost,
                   scoringType: scoringType,
+                  questionSeconds: (roomData['questionSeconds'] as num?)?.toInt() ?? timedModeSeconds,
                 ),
               ));
             });
@@ -98,7 +99,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   style: const TextStyle(color: Colors.grey),
                 ),
                 Text(
-                  'الصعوبة: ${Difficulty.values.byName(roomData['difficulty'] as String).label}',
+                  'الصعوبة: ${Difficulty.values.byName(roomData['difficulty'] as String).label}'
+                  ' • الوقت لكل سؤال: ${(roomData['questionSeconds'] as num?)?.toInt() ?? timedModeSeconds} ث',
                   style: const TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 24),

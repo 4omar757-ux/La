@@ -15,6 +15,7 @@ class RoomQuizScreen extends StatefulWidget {
   final String playerId;
   final bool isHost;
   final GroupScoringType scoringType;
+  final int questionSeconds;
 
   const RoomQuizScreen({
     super.key,
@@ -22,6 +23,7 @@ class RoomQuizScreen extends StatefulWidget {
     required this.playerId,
     required this.isHost,
     required this.scoringType,
+    required this.questionSeconds,
   });
 
   @override
@@ -43,8 +45,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
   int _secondsLeft = 0;
   bool _navigatedToResults = false;
 
-  int get _duration =>
-      widget.scoringType == GroupScoringType.timed ? timedModeSeconds : fastestModeMaxSeconds;
+  int get _duration => widget.questionSeconds;
 
   @override
   void dispose() {

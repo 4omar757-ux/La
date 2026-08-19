@@ -44,8 +44,13 @@ class RoomService {
     required int questionCount,
     required String hostName,
     required String hostPlayerId,
+    QuestionSection? section,
+    required int questionSeconds,
   }) async {
-    final pool = sampleQuestions.where((q) => q.difficulty == difficulty).toList()..shuffle();
+    final pool = sampleQuestions
+        .where((q) => q.difficulty == difficulty && (section == null || q.section == section))
+        .toList()
+      ..shuffle();
     final questionIds = pool.take(questionCount).map((q) => q.id).toList();
 
     String? code;
@@ -64,6 +69,8 @@ class RoomService {
           tx.set(ref, {
             'scoringType': scoringType.name,
             'difficulty': difficulty.name,
+            'section': section?.name,
+            'questionSeconds': questionSeconds,
             'status': 'lobby',
             'questionIds': questionIds,
             'currentIndex': -1,

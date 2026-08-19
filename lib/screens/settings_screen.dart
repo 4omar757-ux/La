@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/sound_service.dart';
+import 'stats_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -54,6 +55,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
+            ),
+          ),
+          const _SectionTitle('أدائي'),
+          Card(
+            margin: const EdgeInsets.only(bottom: 24),
+            child: ListTile(
+              leading: const Icon(Icons.bar_chart_rounded),
+              title: const Text('إحصائياتي بأقسام قياس', style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: const Text('نسبة إجاباتك الصحيحة بكل قسم (تصنيف، تناظر، إكمال جمل)'),
+              trailing: const Icon(Icons.chevron_left_rounded),
+              onTap: () {
+                if (!ModalRoute.of(context)!.isCurrent) return;
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StatsScreen()));
+              },
             ),
           ),
           const _SectionTitle('عن التطبيق'),

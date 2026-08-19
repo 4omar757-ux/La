@@ -37,6 +37,9 @@ class _RoomResultsScreenState extends State<RoomResultsScreen> {
       final scoringType = GroupScoringType.values.byName(roomData['scoringType'] as String);
       final difficulty = Difficulty.values.byName(roomData['difficulty'] as String);
       final questionCount = (roomData['questionIds'] as List).length;
+      final sectionName = roomData['section'] as String?;
+      final section = sectionName == null ? null : QuestionSection.values.byName(sectionName);
+      final questionSeconds = (roomData['questionSeconds'] as num?)?.toInt() ?? timedModeSeconds;
 
       final playerSnap = await FirebaseFirestore.instance
           .collection('rooms')
@@ -50,6 +53,8 @@ class _RoomResultsScreenState extends State<RoomResultsScreen> {
         scoringType: scoringType,
         difficulty: difficulty,
         questionCount: questionCount,
+        section: section,
+        questionSeconds: questionSeconds,
         hostName: hostName,
         hostPlayerId: widget.playerId,
       );

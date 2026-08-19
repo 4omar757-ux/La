@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import '../../models/question.dart';
 import '../../services/firebase_status.dart';
 import '../../services/room_service.dart';
+import '../difficulty_select_screen.dart' show questionSecondsOptions;
 import 'lobby_screen.dart';
 
 class GroupSetupScreen extends StatefulWidget {
   final GroupScoringType? initialType;
   final Difficulty difficulty;
   final int questionCount;
+  final QuestionSection? section;
+  final int questionSeconds;
   const GroupSetupScreen({
     super.key,
     required this.initialType,
     required this.difficulty,
     required this.questionCount,
+    this.section,
+    required this.questionSeconds,
   });
 
   @override
@@ -24,6 +29,7 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
   final _nameController = TextEditingController();
   final _codeController = TextEditingController();
   late GroupScoringType _scoringType;
+  late int _questionSeconds;
   bool _busy = false;
   String? _error;
 
@@ -31,6 +37,7 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
   void initState() {
     super.initState();
     _scoringType = widget.initialType ?? GroupScoringType.fastest;
+    _questionSeconds = widget.questionSeconds;
   }
 
   @override
@@ -56,6 +63,8 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
         scoringType: _scoringType,
         difficulty: widget.difficulty,
         questionCount: widget.questionCount,
+        section: widget.section,
+        questionSeconds: _questionSeconds,
         hostName: name,
         hostPlayerId: playerId,
       );
@@ -160,8 +169,19 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
             const Text('إنشاء غرفة جديدة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 4),
             Text(
-              'مستوى الصعوبة: ${widget.difficulty.label} • عدد الأسئلة: ${widget.questionCount}',
+              'مستوى الصعوبة: ${widget.difficulty.label} • عدد الأسئلة: ${widget.questionCount}'
+              '${widget.section != null ? ' • القسم: ${widget.section!.label}' : ''}',
               style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            const Text('الوقت لكل سؤال', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            const SizedBox(height: 8),
+            SegmentedButton<int>(
+              segments: [
+                for (final s in questionSecondsOptions) ButtonSegment(value: s, label: Text('$s ث')),
+              ],
+              selected: {_questionSeconds},
+              onSelectionChanged: (s) => setState(() => _questionSeconds = s.first),
             ),
             const SizedBox(height: 8),
             if (widget.initialType != null)

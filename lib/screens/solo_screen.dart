@@ -5,15 +5,24 @@ import '../data/sample_questions.dart';
 import '../models/question.dart';
 import '../services/sound_service.dart';
 import '../services/score_history_service.dart';
+import '../services/section_stats_service.dart';
 import '../widgets/option_button.dart';
 import '../widgets/clock_countdown.dart';
-
-const int _secondsPerQuestion = 15;
+import 'answer_review_screen.dart';
 
 class SoloScreen extends StatefulWidget {
   final Difficulty difficulty;
   final int questionCount;
-  const SoloScreen({super.key, required this.difficulty, required this.questionCount});
+  final QuestionSection? section;
+  final int questionSeconds;
+
+  const SoloScreen({
+    super.key,
+    required this.difficulty,
+    required this.questionCount,
+    this.section,
+    required this.questionSeconds,
+  });
 
   @override
   State<SoloScreen> createState() => _SoloScreenState();
@@ -27,13 +36,17 @@ class _SoloScreenState extends State<SoloScreen> {
   bool _answered = false;
   bool _navigatingAway = false;
   Timer? _timer;
-  int _secondsLeft = _secondsPerQuestion;
+  late int _secondsLeft = widget.questionSeconds;
   final Stopwatch _totalTime = Stopwatch();
+  final List<MissedAnswer> _missed = [];
 
   @override
   void initState() {
     super.initState();
-    _questions = (sampleQuestions.where((q) => q.difficulty == widget.difficulty).toList()..shuffle())
+    _questions = (sampleQuestions
+            .where((q) => q.difficulty == widget.difficulty && (widget.section == null || q.section == widget.section))
+            .toList()
+          ..shuffle())
         .take(widget.questionCount)
         .map((q) => q.shuffled())
         .toList();
@@ -48,7 +61,7 @@ class _SoloScreenState extends State<SoloScreen> {
   }
 
   void _startTimer() {
-    _secondsLeft = _secondsPerQuestion;
+    _secondsLeft = widget.questionSeconds;
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
@@ -80,7 +93,9 @@ class _SoloScreenState extends State<SoloScreen> {
       SoundService.instance.playCorrect();
     } else {
       SoundService.instance.playWrong();
+      _missed.add(MissedAnswer(question: question, selectedIndex: optionIndex));
     }
+    SectionStatsService.instance.recordAnswer(section: question.section, correct: correct);
     // إذا السؤال فيه توضيح/سبب، ننتظر ضغطة "التالي" حتى يقدر يقرأه بدل ما
     // ننتقل تلقائياً بسرعة.
     if (question.explanation == null) {
@@ -105,6 +120,9 @@ class _SoloScreenState extends State<SoloScreen> {
           elapsed: _totalTime.elapsed,
           difficulty: widget.difficulty,
           questionCount: widget.questionCount,
+          section: widget.section,
+          questionSeconds: widget.questionSeconds,
+          missed: _missed,
         ),
       ));
       return;
@@ -132,8 +150,8 @@ class _SoloScreenState extends State<SoloScreen> {
           children: [
             Center(
               child: ClockCountdown(
-                secondsLeft: _secondsLeft.clamp(0, _secondsPerQuestion),
-                totalSeconds: _secondsPerQuestion,
+                secondsLeft: _secondsLeft.clamp(0, widget.questionSeconds),
+                totalSeconds: widget.questionSeconds,
               ),
             ),
             const SizedBox(height: 20),
@@ -210,6 +228,9 @@ class _SoloResultsScreen extends StatefulWidget {
   final Duration elapsed;
   final Difficulty difficulty;
   final int questionCount;
+  final QuestionSection? section;
+  final int questionSeconds;
+  final List<MissedAnswer> missed;
 
   const _SoloResultsScreen({
     required this.score,
@@ -217,6 +238,9 @@ class _SoloResultsScreen extends StatefulWidget {
     required this.elapsed,
     required this.difficulty,
     required this.questionCount,
+    required this.section,
+    required this.questionSeconds,
+    required this.missed,
   });
 
   @override
@@ -272,6 +296,22 @@ class _SoloResultsScreenState extends State<_SoloResultsScreen> {
                   ),
                 ],
                 const SizedBox(height: 32),
+                if (widget.missed.isNotEmpty) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        if (!ModalRoute.of(context)!.isCurrent) return;
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => AnswerReviewScreen(missed: widget.missed),
+                        ));
+                      },
+                      icon: const Icon(Icons.fact_check_rounded),
+                      label: Text('راجع أخطاءك (${widget.missed.length})'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -281,6 +321,8 @@ class _SoloResultsScreenState extends State<_SoloResultsScreen> {
                         builder: (_) => SoloScreen(
                           difficulty: widget.difficulty,
                           questionCount: widget.questionCount,
+                          section: widget.section,
+                          questionSeconds: widget.questionSeconds,
                         ),
                       ));
                     },

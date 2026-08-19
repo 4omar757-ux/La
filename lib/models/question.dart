@@ -15,12 +15,29 @@ extension DifficultyLabel on Difficulty {
   }
 }
 
+/// أقسام بنك أسئلة قياس الثلاثة (القسم اللفظي من اختبار القدرات العامة).
+enum QuestionSection { classification, analogy, completion }
+
+extension QuestionSectionLabel on QuestionSection {
+  String get label {
+    switch (this) {
+      case QuestionSection.classification:
+        return 'التصنيف اللفظي';
+      case QuestionSection.analogy:
+        return 'التناظر اللفظي';
+      case QuestionSection.completion:
+        return 'إكمال الجمل';
+    }
+  }
+}
+
 class Question {
   final String id;
   final String text;
   final List<String> options;
   final int correctIndex;
   final Difficulty difficulty;
+  final QuestionSection section;
   final String? explanation;
 
   const Question({
@@ -29,6 +46,7 @@ class Question {
     required this.options,
     required this.correctIndex,
     required this.difficulty,
+    required this.section,
     this.explanation,
   });
 
@@ -45,6 +63,7 @@ class Question {
       options: [for (final i in order) options[i]],
       correctIndex: order.indexOf(correctIndex),
       difficulty: difficulty,
+      section: section,
       explanation: explanation,
     );
   }

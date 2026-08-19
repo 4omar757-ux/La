@@ -15,9 +15,14 @@ class HomeScreen extends StatelessWidget {
   void _openSolo(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => DifficultySelectScreen(
-        onSelected: (difficulty, questionCount) {
+        onSelected: (difficulty, questionCount, section, questionSeconds) {
           Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => SoloScreen(difficulty: difficulty, questionCount: questionCount),
+            builder: (_) => SoloScreen(
+              difficulty: difficulty,
+              questionCount: questionCount,
+              section: section,
+              questionSeconds: questionSeconds,
+            ),
           ));
         },
       ),
@@ -27,12 +32,14 @@ class HomeScreen extends StatelessWidget {
   void _openGroup(BuildContext context, GroupScoringType? scoringType) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => DifficultySelectScreen(
-        onSelected: (difficulty, questionCount) {
+        onSelected: (difficulty, questionCount, section, questionSeconds) {
           Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => GroupSetupScreen(
               initialType: scoringType,
               difficulty: difficulty,
               questionCount: questionCount,
+              section: section,
+              questionSeconds: questionSeconds,
             ),
           ));
         },
