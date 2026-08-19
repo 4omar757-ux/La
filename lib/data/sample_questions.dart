@@ -290,7 +290,7 @@ const List<Question> sampleQuestions = [
     options: ['الرسم', 'الموسيقى', 'الرياضيات', 'التمثيل'],
     correctIndex: 2,
     difficulty: Difficulty.intermediate,
-    explanation: 'الثلاثة الأولى من الفنون، والرياضيات علم.',
+    explanation: 'الثلاثة الأخرى من الفنون، والرياضيات علم.',
   ),
   Question(
     id: 'q36',
