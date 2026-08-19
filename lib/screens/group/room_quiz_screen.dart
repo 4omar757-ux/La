@@ -30,6 +30,12 @@ class RoomQuizScreen extends StatefulWidget {
   State<RoomQuizScreen> createState() => _RoomQuizScreenState();
 }
 
+// مدة انتظار ثابتة بعد إجابة الجميع أو انتهاء الوقت، حتى يقدر كل لاعب
+// يشوف الإجابة الصحيحة ويقرأ السبب قبل ما ننتقل للسؤال التالي — بدونها
+// كان الانتقال يصير فوري (خصوصاً لو غرفة بلاعب وحيد يختبر لحاله)، فما
+// يقدر أحد يشوف شي.
+const int _revealPauseSeconds = 4;
+
 class _RoomQuizScreenState extends State<RoomQuizScreen> {
   final _roomService = RoomService();
   Timer? _ticker;
@@ -103,18 +109,28 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
         HapticFeedback.mediumImpact();
         if (!_revealed && mounted) setState(() => _revealed = true);
         if (widget.isHost && _closingIndex != _lastSeenIndex) {
-          _closingIndex = _lastSeenIndex;
-          _roomService.closeQuestionAndScore(
-            code: widget.code,
-            questionIndex: _lastSeenIndex,
-            scoringType: widget.scoringType,
-          );
+          _scheduleClose(_lastSeenIndex);
         }
       } else {
         SoundService.instance.playTick();
         HapticFeedback.selectionClick();
       }
     });
+  }
+
+  /// يعلّم السؤال الحالي "بصدد الإغلاق" فوراً (حتى ما نكرر الاستدعاء من
+  /// إعادة رسم الواجهة المتكررة)، بس يأخر الإغلاق الفعلي (الانتقال للسؤال
+  /// التالي) بمقدار [_revealPauseSeconds] حتى يقدر الجميع يشوفون الإجابة
+  /// الصحيحة والسبب أول.
+  Future<void> _scheduleClose(int index) async {
+    _closingIndex = index;
+    await Future.delayed(const Duration(seconds: _revealPauseSeconds));
+    if (!mounted || _closingIndex != index) return;
+    await _roomService.closeQuestionAndScore(
+      code: widget.code,
+      questionIndex: index,
+      scoringType: widget.scoringType,
+    );
   }
 
   Future<void> _checkAllAnswered(
@@ -124,12 +140,8 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
     if (!widget.isHost) return;
     if (_closingIndex == _lastSeenIndex) return;
     if (playerCount > 0 && answers.length >= playerCount) {
-      _closingIndex = _lastSeenIndex;
-      await _roomService.closeQuestionAndScore(
-        code: widget.code,
-        questionIndex: _lastSeenIndex,
-        scoringType: widget.scoringType,
-      );
+      if (!_revealed && mounted) setState(() => _revealed = true);
+      await _scheduleClose(_lastSeenIndex);
     }
   }
 
