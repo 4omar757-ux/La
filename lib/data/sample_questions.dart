@@ -459,7 +459,7 @@ const List<Question> sampleQuestions = [
   Question(
     id: 'q56',
     text: 'أي من الآتي مختلف؟',
-    options: ['الأرنب', 'السلحفاة', 'الثعلب', 'الدولفين'],
+    options: ['الأرنب', 'الظبي', 'الثعلب', 'الدولفين'],
     correctIndex: 3,
     difficulty: Difficulty.beginner,
     explanation: 'الثلاثة الأولى حيوانات برية، والدولفين حيوان بحري.',
@@ -826,11 +826,11 @@ const List<Question> sampleQuestions = [
   // ── متوسط — دين وثقافة عامة ─────────────────────────────
   Question(
     id: 'q101',
-    text: 'أي من الآتي مختلف؟',
+    text: 'ما هو آخر الكتب السماوية نزولاً؟',
     options: ['التوراة', 'الإنجيل', 'الزبور', 'القرآن الكريم'],
     correctIndex: 3,
     difficulty: Difficulty.intermediate,
-    explanation: 'الأربعة كتب سماوية، لكن القرآن هو آخرها نزولاً والوحيد المحفوظ من التحريف.',
+    explanation: 'القرآن الكريم هو آخر الكتب السماوية نزولاً، وهو المحفوظ من التحريف.',
   ),
   Question(
     id: 'q102',
