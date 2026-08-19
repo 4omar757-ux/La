@@ -1,0 +1,62 @@
+rules_version = '2';
+
+// قواعد أمان Firestore لتطبيق "ق" (Qaf).
+//
+// كيف تفعّلها: افتح Firebase Console → مشروعك → Firestore Database →
+// تبويب Rules، احذف المحتوى الموجود، والصق محتوى هذا الملف كامل، ثم اضغط
+// Publish. لازم تسويها بعد كل تغيير هنا لأن Firebase ما يقرأ هذا الملف
+// تلقائياً من المستودع — لازم تنسخه يدوياً.
+//
+// كل القواعد تتطلب request.auth != null، يعني لازم يكون الجهاز مسجّل دخول
+// مجهول (Anonymous) عبر Firebase Auth — التطبيق يسوي هذا تلقائياً عند
+// بدء التشغيل. بدونها، أي جهاز عنده مفاتيح المشروع (موجودة داخل كل نسخة
+// من التطبيق) يقدر يقرأ ويكتب على أي غرفة بلا أي تحقق.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /rooms/{roomCode} {
+      // قراءة غرفة واحدة بالكود مسموحة لأي جهاز مسجّل دخول، لكن مافيه
+      // استعلام (list) يستعرض كل الغرف — يمنع أي محاولة "تصفح" الغرف.
+      allow get: if request.auth != null;
+      allow list: if false;
+
+      // إنشاء غرفة: يجب أن يكون uid المُنشئ هو نفسه المُعلن كـ hostPlayerId.
+      allow create: if request.auth != null
+                    && request.resource.data.hostPlayerId == request.auth.uid;
+
+      // تحديث حالة الغرفة (الانتقال للسؤال التالي، إنهاء المسابقة):
+      // يقدر يسويه فقط الجهاز المضيف (صاحب hostPlayerId المسجّل).
+      allow update: if request.auth != null
+                    && resource.data.hostPlayerId == request.auth.uid;
+
+      allow delete: if false;
+
+      match /players/{playerId} {
+        allow read: if request.auth != null;
+
+        // كل لاعب يقدر يسجّل نفسه فقط (playerId == uid تسجيل الدخول).
+        allow create: if request.auth != null && request.auth.uid == playerId;
+
+        // تحديث النقاط يسويه المضيف فقط (بعد احتساب كل جولة)، أو اللاعب
+        // نفسه (مثلاً لو غيّر اسمه لاحقاً).
+        allow update: if request.auth != null
+                      && (request.auth.uid == playerId
+                          || request.auth.uid ==
+                             get(/databases/$(database)/documents/rooms/$(roomCode)).data.hostPlayerId);
+
+        allow delete: if false;
+      }
+
+      match /answers/{answerId} {
+        allow read: if request.auth != null;
+
+        // كل لاعب يقدر يرسل إجابة باسمه هو فقط.
+        allow create: if request.auth != null
+                      && request.resource.data.playerId == request.auth.uid;
+
+        // الإجابات لا تُعدّل ولا تُحذف بعد إرسالها (يمنع الغش بتغيير إجابة
+        // بعد رؤية النتيجة).
+        allow update, delete: if false;
+      }
+    }
+  }
+}

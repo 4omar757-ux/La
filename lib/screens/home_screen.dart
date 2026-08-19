@@ -44,6 +44,7 @@ class HomeScreen extends StatelessWidget {
     required List<String> steps,
     required VoidCallback onStart,
   }) {
+    if (!ModalRoute.of(context)!.isCurrent) return;
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => ModeExplanationScreen(
         icon: icon,
@@ -75,9 +76,12 @@ class HomeScreen extends StatelessWidget {
               child: Icon(Icons.settings_rounded, size: 18, color: Color(0xFFE7B24B)),
             ),
             tooltip: 'الإعدادات',
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => const SettingsScreen(),
-            )),
+            onPressed: () {
+              if (!ModalRoute.of(context)!.isCurrent) return;
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+              ));
+            },
           ),
         ],
       ),

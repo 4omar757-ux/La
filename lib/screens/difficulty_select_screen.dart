@@ -16,7 +16,12 @@ class DifficultySelectScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             for (final d in Difficulty.values) ...[
-              _DifficultyCard(difficulty: d, onTap: () => onSelected(d)),
+              _DifficultyCard(
+                difficulty: d,
+                onTap: () {
+                  if (ModalRoute.of(context)!.isCurrent) onSelected(d);
+                },
+              ),
               const SizedBox(height: 14),
             ],
           ],

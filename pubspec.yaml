@@ -9,17 +9,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.6
-  firebase_core: any
-  cloud_firestore: any
-  firebase_auth: any
-  audioplayers: any
+  firebase_core: ^4.13.0
+  cloud_firestore: ^6.8.0
+  firebase_auth: ^6.5.7
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  flutter_launcher_icons: any
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true

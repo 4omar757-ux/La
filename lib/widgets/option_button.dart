@@ -43,6 +43,8 @@ class OptionButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: _bgColor(context),
           foregroundColor: _fgColor(context),
+          disabledBackgroundColor: _bgColor(context),
+          disabledForegroundColor: _fgColor(context),
           padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           elevation: 0,

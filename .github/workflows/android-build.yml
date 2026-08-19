@@ -56,6 +56,17 @@ jobs:
             -e 's/minSdk = flutter\.minSdkVersion\.toInteger()/minSdk = 23/' \
             "$GRADLE_FILE"
 
+          # Fail fast (with a clear message) instead of silently building an
+          # APK that will crash at runtime, if none of the sed patterns above
+          # matched a future Flutter template's exact wording.
+          if grep -q 'flutter\.minSdkVersion' "$GRADLE_FILE"; then
+            echo "ERROR: minSdkVersion patch did not match anything in $GRADLE_FILE."
+            echo "The Flutter template's wording for this line has probably changed."
+            echo "--- $GRADLE_FILE content ---"
+            cat "$GRADLE_FILE"
+            exit 1
+          fi
+
           echo "--- resulting $GRADLE_FILE ---"
           cat "$GRADLE_FILE"
           echo "--- resulting settings.gradle(.kts) ---"
@@ -87,5 +98,5 @@ jobs:
           files: build/app/outputs/flutter-apk/app-release.apk
           body: |
             بناء تلقائي لتطبيق "مسابقة" (Flutter).
-            الوضع الفردي يعمل مباشرة بدون إعداد.
-            أوضاع اللعب الجماعي تحتاج ربط المشروع بـ Firebase (راجع FIREBASE_SETUP.md).
+            كل الأوضاع (فردي وجماعي) تعمل — المشروع متصل بـ Firebase.
+            راجع FIREBASE_SETUP.md لخطوة أمان يدوية باقية (نشر قواعد Firestore).

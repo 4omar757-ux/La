@@ -102,7 +102,9 @@ class ModeExplanationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: onStart,
+                onPressed: () {
+                  if (ModalRoute.of(context)!.isCurrent) onStart();
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: color,

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../data/sample_questions.dart';
 import '../models/question.dart';
 
@@ -25,7 +26,15 @@ class RoomService {
     return List.generate(length, (_) => chars[_rand.nextInt(chars.length)]).join();
   }
 
-  String newPlayerId() => _randomId(12);
+  /// معرّف اللاعب الحالي = uid تسجيل الدخول المجهول من Firebase Auth، حتى
+  /// تقدر قواعد أمان Firestore تتحقق أن كل لاعب لا يكتب إلا على بياناته هو.
+  String newPlayerId() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      throw StateError('لا يوجد تسجيل دخول مجهول نشط بعد.');
+    }
+    return uid;
+  }
 
   Future<String> createRoom({
     required GroupScoringType scoringType,
@@ -36,31 +45,38 @@ class RoomService {
     final pool = sampleQuestions.where((q) => q.difficulty == difficulty).toList()..shuffle();
     final questionIds = pool.take(roomQuestionCount).map((q) => q.id).toList();
 
-    String code = '';
-    DocumentReference<Map<String, dynamic>>? ref;
-    for (var attempt = 0; attempt < 10; attempt++) {
-      code = _randomId(5);
-      final candidate = _db.collection('rooms').doc(code);
-      final snap = await candidate.get();
-      if (!snap.exists) {
-        ref = candidate;
-        break;
+    String? code;
+    for (var attempt = 0; attempt < 10 && code == null; attempt++) {
+      final candidate = _randomId(5);
+      final ref = _db.collection('rooms').doc(candidate);
+      try {
+        // معاملة (transaction) بدل قراءة ثم كتابة منفصلتين، حتى نمنع احتمال
+        // -- ولو نادر -- يختار فيه جهازان نفس الكود بنفس اللحظة فيتكتب أحدهما
+        // فوق الثاني.
+        await _db.runTransaction((tx) async {
+          final snap = await tx.get(ref);
+          if (snap.exists) {
+            throw _RoomCodeTakenException();
+          }
+          tx.set(ref, {
+            'scoringType': scoringType.name,
+            'difficulty': difficulty.name,
+            'status': 'lobby',
+            'questionIds': questionIds,
+            'currentIndex': -1,
+            'currentQuestionStartedAt': null,
+            'hostPlayerId': hostPlayerId,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        });
+        code = candidate;
+      } on _RoomCodeTakenException {
+        continue;
       }
     }
-    if (ref == null) {
+    if (code == null) {
       throw Exception('تعذر إنشاء غرفة، حاول مرة أخرى.');
     }
-
-    await ref.set({
-      'scoringType': scoringType.name,
-      'difficulty': difficulty.name,
-      'status': 'lobby',
-      'questionIds': questionIds,
-      'currentIndex': -1,
-      'currentQuestionStartedAt': null,
-      'hostPlayerId': hostPlayerId,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
 
     await joinRoom(code: code, playerId: hostPlayerId, name: hostName);
     return code;
@@ -182,3 +198,5 @@ class RoomService {
     }
   }
 }
+
+class _RoomCodeTakenException implements Exception {}

@@ -34,9 +34,11 @@ class Question {
 
   /// نسخة من السؤال بترتيب خيارات معاد خلطه، بحيث لا تكون الإجابة الصحيحة
   /// دائماً في نفس الموضع. الخلط ثابت (مبني على [id]) حتى يتفق كل اللاعبين
-  /// في نفس الغرفة على نفس ترتيب الخيارات.
+  /// في نفس الغرفة على نفس ترتيب الخيارات — نستخدم دالة هاش يدوية بدل
+  /// String.hashCode لأن الأخيرة غير مضمونة تعطي نفس القيمة بين منصات
+  /// تشغيل Dart المختلفة (موبايل مقابل ويب مثلاً).
   Question shuffled() {
-    final order = List<int>.generate(options.length, (i) => i)..shuffle(Random(id.hashCode));
+    final order = List<int>.generate(options.length, (i) => i)..shuffle(Random(_stableSeed(id)));
     return Question(
       id: id,
       text: text,
@@ -46,4 +48,15 @@ class Question {
       explanation: explanation,
     );
   }
+}
+
+/// دالة هاش بسيطة وثابتة (FNV-1a) تعطي نفس الرقم لنفس النص على أي منصة
+/// تشغيل Dart، على عكس String.hashCode المدمجة.
+int _stableSeed(String input) {
+  var hash = 0x811c9dc5;
+  for (final codeUnit in input.codeUnits) {
+    hash ^= codeUnit;
+    hash = (hash * 0x01000193) & 0xFFFFFFFF;
+  }
+  return hash;
 }

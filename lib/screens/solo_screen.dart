@@ -23,6 +23,7 @@ class _SoloScreenState extends State<SoloScreen> {
   int _score = 0;
   int? _selected;
   bool _answered = false;
+  bool _navigatingAway = false;
   Timer? _timer;
   int _secondsLeft = _secondsPerQuestion;
   final Stopwatch _totalTime = Stopwatch();
@@ -82,7 +83,8 @@ class _SoloScreenState extends State<SoloScreen> {
   }
 
   void _nextQuestion() {
-    if (!mounted) return;
+    if (!mounted || _navigatingAway) return;
+    _navigatingAway = true;
     if (_index >= _questions.length - 1) {
       _totalTime.stop();
       Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -98,6 +100,7 @@ class _SoloScreenState extends State<SoloScreen> {
       _index++;
       _answered = false;
       _selected = null;
+      _navigatingAway = false;
     });
     _startTimer();
   }
