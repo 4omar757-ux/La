@@ -14,13 +14,21 @@ Future<void> initFirebase() async {
       return;
     }
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    // تسجيل دخول مجهول (Anonymous) حتى يكون لكل جهاز uid ثابت تعتمد عليه
-    // قواعد أمان Firestore، بدل السماح لأي جهاز يكتب بيانات أي غرفة بلا تحقق.
-    if (FirebaseAuth.instance.currentUser == null) {
-      await FirebaseAuth.instance.signInAnonymously();
-    }
     firebaseReady = true;
   } catch (_) {
     firebaseReady = false;
+    return;
+  }
+
+  // تسجيل الدخول المجهول (Anonymous) منفصل عمداً عن firebaseReady: لو فشل
+  // هذا التسجيل (مثلاً مشكلة شبكة مؤقتة)، ما نبي هذا يخفي وضع اللعب
+  // الجماعي بالكامل. لو ما نجح هنا، RoomService.newPlayerId() يعيد
+  // المحاولة وقت الحاجة الفعلية (إنشاء/الانضمام لغرفة).
+  try {
+    if (FirebaseAuth.instance.currentUser == null) {
+      await FirebaseAuth.instance.signInAnonymously();
+    }
+  } catch (_) {
+    // تجاهل هنا؛ newPlayerId() يعيد المحاولة لاحقاً.
   }
 }

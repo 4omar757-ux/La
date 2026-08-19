@@ -45,7 +45,7 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
       _error = null;
     });
     try {
-      final playerId = _roomService.newPlayerId();
+      final playerId = await _roomService.newPlayerId();
       final code = await _roomService.createRoom(
         scoringType: _scoringType,
         difficulty: widget.difficulty,
@@ -91,7 +91,7 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
         });
         return;
       }
-      final playerId = _roomService.newPlayerId();
+      final playerId = await _roomService.newPlayerId();
       await _roomService.joinRoom(code: code, playerId: playerId, name: name);
       if (!mounted) return;
       Navigator.of(context).push(MaterialPageRoute(

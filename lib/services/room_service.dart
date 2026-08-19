@@ -28,12 +28,15 @@ class RoomService {
 
   /// معرّف اللاعب الحالي = uid تسجيل الدخول المجهول من Firebase Auth، حتى
   /// تقدر قواعد أمان Firestore تتحقق أن كل لاعب لا يكتب إلا على بياناته هو.
-  String newPlayerId() {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      throw StateError('لا يوجد تسجيل دخول مجهول نشط بعد.');
+  /// لو تسجيل الدخول عند بدء التطبيق ما نجح (مثلاً مشكلة شبكة مؤقتة)، نعيد
+  /// المحاولة هنا وقت الحاجة الفعلية بدل ما نمنع اللعب الجماعي بالكامل.
+  Future<String> newPlayerId() async {
+    var user = FirebaseAuth.instance.currentUser;
+    user ??= (await FirebaseAuth.instance.signInAnonymously()).user;
+    if (user == null) {
+      throw StateError('تعذر تسجيل الدخول. تأكد من الاتصال بالإنترنت وحاول مرة أخرى.');
     }
-    return uid;
+    return user.uid;
   }
 
   Future<String> createRoom({
