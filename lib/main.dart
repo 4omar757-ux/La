@@ -4,13 +4,17 @@ import 'services/firebase_status.dart';
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await initFirebase();
-  } catch (e, st) {
+  // لا ننتظر (await) تهيئة Firebase هنا عمداً: هذا يتطلب اتصال شبكة وبدون
+  // مهلة زمنية محددة (timeout)، فلو كانت الشبكة بطيئة أو غير مستقرة يبقى
+  // التطبيق عالقاً على شاشة البداية للأبد لأن أول إطار (frame) ما يُرسم
+  // إلا بعد ما يخلص هذا الاستدعاء. الآن runApp() يشتغل فوراً بغض النظر عن
+  // حالة الشبكة، وتهيئة Firebase تصير بالخلفية (الوضع الجماعي أصلاً يتحمّل
+  // تأخرها لأن RoomService.newPlayerId() يعيد محاولة تسجيل الدخول بنفسه).
+  initFirebase().catchError((e, st) {
     debugPrint('Firebase init failed: $e\n$st');
-  }
+  });
   runApp(const MasabaqaApp());
 }
 

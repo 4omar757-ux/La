@@ -13,7 +13,8 @@ Future<void> initFirebase() async {
       firebaseReady = false;
       return;
     }
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
+        .timeout(const Duration(seconds: 15));
     firebaseReady = true;
   } catch (_) {
     firebaseReady = false;
@@ -26,7 +27,7 @@ Future<void> initFirebase() async {
   // المحاولة وقت الحاجة الفعلية (إنشاء/الانضمام لغرفة).
   try {
     if (FirebaseAuth.instance.currentUser == null) {
-      await FirebaseAuth.instance.signInAnonymously();
+      await FirebaseAuth.instance.signInAnonymously().timeout(const Duration(seconds: 15));
     }
   } catch (_) {
     // تجاهل هنا؛ newPlayerId() يعيد المحاولة لاحقاً.
