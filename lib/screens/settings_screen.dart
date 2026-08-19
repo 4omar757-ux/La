@@ -1,7 +1,23 @@
 import 'package:flutter/material.dart';
+import '../services/sound_service.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  double _volume = SoundService.instance.volume;
+
+  @override
+  void initState() {
+    super.initState();
+    SoundService.instance.init().then((_) {
+      if (mounted) setState(() => _volume = SoundService.instance.volume);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -9,21 +25,51 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('الإعدادات')),
       body: ListView(
         padding: const EdgeInsets.all(20),
-        children: const [
-          _SectionTitle('عن التطبيق'),
-          _InfoTile(
+        children: [
+          const _SectionTitle('الصوت'),
+          Card(
+            margin: const EdgeInsets.only(bottom: 24),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(_volume == 0 ? Icons.volume_off_rounded : Icons.volume_up_rounded),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text('مستوى صوت المؤقت', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Text('${(_volume * 100).round()}٪', style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                  Slider(
+                    value: _volume,
+                    onChanged: (v) {
+                      setState(() => _volume = v);
+                      SoundService.instance.setVolume(v);
+                    },
+                    onChangeEnd: (v) => SoundService.instance.playTick(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const _SectionTitle('عن التطبيق'),
+          const _InfoTile(
             icon: Icons.info_outline_rounded,
             title: 'تطبيق "ق"',
             subtitle: 'تطبيق مسابقات أسئلة، فيه أوضاع فردية وجماعية بمستويات صعوبة مختلفة (مبتدئ، متوسط، صعب).',
           ),
-          _InfoTile(
+          const _InfoTile(
             icon: Icons.numbers_rounded,
             title: 'الإصدار',
             subtitle: '1.0.0',
           ),
-          SizedBox(height: 24),
-          _SectionTitle('عن المطوّر'),
-          _InfoTile(
+          const SizedBox(height: 24),
+          const _SectionTitle('عن المطوّر'),
+          const _InfoTile(
             icon: Icons.person_outline_rounded,
             title: 'البرمجة والتصميم',
             subtitle: 'عمر العايد',
