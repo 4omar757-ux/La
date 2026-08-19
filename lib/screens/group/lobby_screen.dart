@@ -24,10 +24,28 @@ class _LobbyScreenState extends State<LobbyScreen> {
   final _roomService = RoomService();
   bool _navigated = false;
 
+  Future<void> _leave() async {
+    try {
+      await _roomService.leaveRoom(code: widget.code, playerId: widget.playerId);
+    } catch (_) {
+      // تجاهل؛ المهم إنه يقدر يطلع من الشاشة حتى لو فشل تسجيل المغادرة.
+    }
+    if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('غرفة الانتظار')),
+      appBar: AppBar(
+        title: const Text('غرفة الانتظار'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app_rounded),
+            tooltip: 'مغادرة الغرفة',
+            onPressed: _leave,
+          ),
+        ],
+      ),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: _roomService.watchRoom(widget.code),
         builder: (context, roomSnap) {
@@ -82,7 +100,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: _roomService.watchPlayers(widget.code),
                     builder: (context, playersSnap) {
-                      final docs = playersSnap.data?.docs ?? [];
+                      final docs = (playersSnap.data?.docs ?? [])
+                          .where((d) => d.data()['left'] != true)
+                          .toList();
                       return ListView.builder(
                         itemCount: docs.length,
                         itemBuilder: (context, i) {

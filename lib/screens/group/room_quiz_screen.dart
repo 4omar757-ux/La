@@ -62,7 +62,11 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (_) => RoomResultsScreen(code: widget.code),
+          builder: (_) => RoomResultsScreen(
+            code: widget.code,
+            isHost: widget.isHost,
+            playerId: widget.playerId,
+          ),
         ));
       });
       return;
@@ -153,7 +157,21 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('كود الغرفة: ${widget.code}')),
+      appBar: AppBar(
+        title: Text('كود الغرفة: ${widget.code}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app_rounded),
+            tooltip: 'مغادرة الغرفة',
+            onPressed: () async {
+              try {
+                await _roomService.leaveRoom(code: widget.code, playerId: widget.playerId);
+              } catch (_) {}
+              if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+            },
+          ),
+        ],
+      ),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: _roomService.watchRoom(widget.code),
         builder: (context, roomSnap) {
@@ -177,7 +195,8 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: _roomService.watchPlayers(widget.code),
             builder: (context, playersSnap) {
-              final playerCount = playersSnap.data?.docs.length ?? 0;
+              final playerCount =
+                  playersSnap.data?.docs.where((d) => d.data()['left'] != true).length ?? 0;
 
               return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: _roomService.watchAnswers(widget.code, index),

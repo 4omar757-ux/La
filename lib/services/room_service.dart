@@ -102,6 +102,15 @@ class RoomService {
     });
   }
 
+  /// يعلّم اللاعب أنه غادر الغرفة (بدون حذف وثيقته — Firestore ما يسمح
+  /// بالحذف أصلاً). المستخدَم في watchPlayers لاستبعاده من قائمة اللاعبين
+  /// النشطين وعدّاد "أجاب X من Y".
+  Future<void> leaveRoom({required String code, required String playerId}) async {
+    await _db.collection('rooms').doc(code).collection('players').doc(playerId).update({
+      'left': true,
+    });
+  }
+
   Stream<DocumentSnapshot<Map<String, dynamic>>> watchRoom(String code) {
     return _db.collection('rooms').doc(code).snapshots();
   }
