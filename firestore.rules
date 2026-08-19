@@ -36,12 +36,18 @@ service cloud.firestore {
         // كل لاعب يقدر يسجّل نفسه فقط (playerId == uid تسجيل الدخول).
         allow create: if request.auth != null && request.auth.uid == playerId;
 
-        // تحديث النقاط يسويه المضيف فقط (بعد احتساب كل جولة)، أو اللاعب
-        // نفسه (مثلاً لو غيّر اسمه لاحقاً).
+        // اللاعب يقدر يغيّر اسمه هو فقط — ما يقدر يلمس حقل score، حتى ما
+        // يقدر يعطي نفسه نقاط مباشرة بتعديل يدوي (تأكدنا من هذا بالضبط
+        // باختبار حقيقي: قبل هذا القيد كان أي لاعب يقدر يكتب أي رقم بحقل
+        // score لنفسه). تحديث score مسموح فقط للمضيف (بعد احتساب كل جولة).
         allow update: if request.auth != null
-                      && (request.auth.uid == playerId
-                          || request.auth.uid ==
-                             get(/databases/$(database)/documents/rooms/$(roomCode)).data.hostPlayerId);
+                      && (
+                        (request.auth.uid == playerId
+                          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']))
+                        || (request.auth.uid ==
+                             get(/databases/$(database)/documents/rooms/$(roomCode)).data.hostPlayerId
+                          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score']))
+                      );
 
         allow delete: if false;
       }
