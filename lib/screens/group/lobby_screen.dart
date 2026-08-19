@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../models/question.dart';
 import '../../services/room_service.dart';
 import 'room_quiz_screen.dart';
@@ -82,6 +83,16 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold, letterSpacing: 4),
                 ),
                 const SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed: () => SharePlus.instance.share(
+                    ShareParams(
+                      text: 'انضم لمسابقتي على تطبيق ق! افتح التطبيق واستخدم كود الغرفة: ${widget.code}',
+                    ),
+                  ),
+                  icon: const Icon(Icons.share_rounded, size: 18),
+                  label: const Text('شارك الكود'),
+                ),
+                const SizedBox(height: 4),
                 Text(
                   scoringType == GroupScoringType.fastest ? 'الوضع: الأسرع يفوز' : 'الوضع: سباق الوقت',
                   style: const TextStyle(color: Colors.grey),

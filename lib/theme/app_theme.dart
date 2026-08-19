@@ -5,14 +5,18 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static const seedColor = Color(0xFF4F8A73);
 
-  static ThemeData light() {
+  static ThemeData light() => _build(Brightness.light);
+  static ThemeData dark() => _build(Brightness.dark);
+
+  static ThemeData _build(Brightness brightness) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
-      brightness: Brightness.light,
+      brightness: brightness,
     );
 
     return ThemeData(
       useMaterial3: true,
+      brightness: brightness,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: AppBarTheme(
