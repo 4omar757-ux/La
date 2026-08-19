@@ -70,6 +70,14 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
       _selected = null;
       _questionStarted = startedAtTs?.toDate();
       _restartTicker();
+    } else if (_questionStarted == null && startedAtTs != null) {
+      // نفس السؤال، بس أول snapshot كان يحمل قيمة null مؤقتة لأن
+      // FieldValue.serverTimestamp() يوصل الجهاز أول مرة كـ "صدى محلي"
+      // (local echo) قبل ما يتأكد السيرفر ويرجع الوقت الحقيقي في تحديث
+      // ثانٍ لنفس currentIndex. بدون هذا الشرط يبقى العداد واقف عند صفر
+      // للأبد لأن الشرط أعلاه ما يعيد تشغيله مرة ثانية لنفس السؤال.
+      _questionStarted = startedAtTs.toDate();
+      _restartTicker();
     }
   }
 

@@ -164,14 +164,34 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
               style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            SegmentedButton<GroupScoringType>(
-              segments: const [
-                ButtonSegment(value: GroupScoringType.fastest, label: Text('الأسرع يفوز')),
-                ButtonSegment(value: GroupScoringType.timed, label: Text('سباق الوقت')),
-              ],
-              selected: {_scoringType},
-              onSelectionChanged: (s) => setState(() => _scoringType = s.first),
-            ),
+            if (widget.initialType != null)
+              // جاي من مفتاح مخصص بالشاشة الرئيسية (الأسرع / الوقت) — نظام
+              // النقاط محسوم مسبقاً، فما نعرض خيار تبديله حتى ما يتكرر نفس
+              // الاختيار مرتين ويلخبط المستخدم.
+              Row(
+                children: [
+                  Icon(
+                    _scoringType == GroupScoringType.fastest ? Icons.bolt_rounded : Icons.timer_rounded,
+                    size: 18,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'نظام النقاط: ${_scoringType == GroupScoringType.fastest ? 'الأسرع يفوز' : 'سباق الوقت'}',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
+              )
+            else
+              // جاي من مفتاح "أونلاين" العام — يختار نظام النقاط هنا.
+              SegmentedButton<GroupScoringType>(
+                segments: const [
+                  ButtonSegment(value: GroupScoringType.fastest, label: Text('الأسرع يفوز')),
+                  ButtonSegment(value: GroupScoringType.timed, label: Text('سباق الوقت')),
+                ],
+                selected: {_scoringType},
+                onSelectionChanged: (s) => setState(() => _scoringType = s.first),
+              ),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _busy ? null : _createRoom,
