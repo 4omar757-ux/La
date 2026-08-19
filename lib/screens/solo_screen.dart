@@ -71,7 +71,11 @@ class _SoloScreenState extends State<SoloScreen> {
       _selected = optionIndex;
       if (correct) _score += 10;
     });
-    Future.delayed(const Duration(milliseconds: 1200), _nextQuestion);
+    // إذا السؤال فيه توضيح/سبب، ننتظر ضغطة "التالي" حتى يقدر يقرأه بدل ما
+    // ننتقل تلقائياً بسرعة.
+    if (question.explanation == null) {
+      Future.delayed(const Duration(milliseconds: 1200), _nextQuestion);
+    }
   }
 
   void _nextQuestion() {
@@ -102,7 +106,7 @@ class _SoloScreenState extends State<SoloScreen> {
       appBar: AppBar(
         title: Text('سؤال ${_index + 1} / ${_questions.length}'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -139,6 +143,40 @@ class _SoloScreenState extends State<SoloScreen> {
                 onTap: _answered ? null : () => _onAnswer(i),
               ),
               const SizedBox(height: 12),
+            ],
+            if (_answered && question.explanation != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'السبب',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      question.explanation!,
+                      style: const TextStyle(fontSize: 14, height: 1.5),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              ElevatedButton(
+                onPressed: _nextQuestion,
+                child: Text(_index >= _questions.length - 1 ? 'عرض النتيجة' : 'التالي'),
+              ),
             ],
           ],
         ),

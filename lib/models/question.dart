@@ -19,6 +19,7 @@ class Question {
   final List<String> options;
   final int correctIndex;
   final Difficulty difficulty;
+  final String? explanation;
 
   const Question({
     required this.id,
@@ -26,5 +27,6 @@ class Question {
     required this.options,
     required this.correctIndex,
     required this.difficulty,
+    this.explanation,
   });
 }
