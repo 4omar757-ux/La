@@ -151,7 +151,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
           if (index < 0 || index >= questionIds.length) {
             return const Center(child: CircularProgressIndicator());
           }
-          final question = sampleQuestions.firstWhere((q) => q.id == questionIds[index]);
+          final question = sampleQuestions.firstWhere((q) => q.id == questionIds[index]).shuffled();
 
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: _roomService.watchPlayers(widget.code),

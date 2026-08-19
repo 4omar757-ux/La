@@ -30,7 +30,10 @@ class _SoloScreenState extends State<SoloScreen> {
   @override
   void initState() {
     super.initState();
-    _questions = sampleQuestions.where((q) => q.difficulty == widget.difficulty).toList()
+    _questions = sampleQuestions
+        .where((q) => q.difficulty == widget.difficulty)
+        .map((q) => q.shuffled())
+        .toList()
       ..shuffle();
     _totalTime.start();
     _startTimer();

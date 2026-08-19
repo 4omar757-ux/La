@@ -1,3 +1,5 @@
+import 'dart:math';
+
 enum Difficulty { beginner, intermediate, hard }
 
 extension DifficultyLabel on Difficulty {
@@ -29,4 +31,19 @@ class Question {
     required this.difficulty,
     this.explanation,
   });
+
+  /// نسخة من السؤال بترتيب خيارات معاد خلطه، بحيث لا تكون الإجابة الصحيحة
+  /// دائماً في نفس الموضع. الخلط ثابت (مبني على [id]) حتى يتفق كل اللاعبين
+  /// في نفس الغرفة على نفس ترتيب الخيارات.
+  Question shuffled() {
+    final order = List<int>.generate(options.length, (i) => i)..shuffle(Random(id.hashCode));
+    return Question(
+      id: id,
+      text: text,
+      options: [for (final i in order) options[i]],
+      correctIndex: order.indexOf(correctIndex),
+      difficulty: difficulty,
+      explanation: explanation,
+    );
+  }
 }
