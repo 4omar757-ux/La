@@ -103,16 +103,25 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
 
   void _restartTicker() {
     _ticker?.cancel();
+    // نصفّر العداد المعروض فوراً هنا (لا ننتظر أول تكة بعد 500ms) — قبل
+    // هذا التصفير كان الرقم المعروض يفضل يحمل قيمة السؤال السابق (حتى لو
+    // كان صفر أو أي رقم آخر) لحظياً لين أول تكة توصل، وهذا يعطي انطباع
+    // مضلل عن الوقت الحقيقي المتبقي.
+    _secondsLeft = _duration;
     _ticker = Timer.periodic(const Duration(milliseconds: 500), (_) {
       if (_questionStarted == null) return;
       final elapsed = DateTime.now().difference(_questionStarted!).inSeconds;
       final left = (_duration - elapsed).clamp(0, _duration);
       if (mounted) setState(() => _secondsLeft = left);
       if (left <= 0) {
-        // الحارس هنا مهم: التكة (كل 500ms) تستمر تشتغل طول مهلة العرض
-        // الأربع ثواني بعد انتهاء الوقت (لين السؤال التالي يبدأ) — بدون
-        // هذا الشرط كان صوت/اهتزاز "انتهى الوقت" يتكرر حوالي ٨ مرات بدل
-        // مرة وحدة.
+        // نوقف التكة تماماً هنا — بدون هذا كانت تستمر تشتغل كل 500ms طول
+        // مهلة العرض الأربع ثواني (وتكرر صوت/اهتزاز "انتهى الوقت" حوالي ٨
+        // مرات بدل مرة وحدة)، وأهم من هذا: لو _questionStarted انلمس لأي
+        // سبب بعدها (حتى لو ما يفترض)، التكة كانت تقدر تعيد حساب رقم
+        // مختلف تماماً عن ٠ بعد ما "انتهى الوقت" ظهر فعلاً للمستخدم —
+        // بالضبط التناقض اللي المستخدم صوّره (عداد يبيّن ١٩ ولوحة "انتهى
+        // الوقت" ظاهرة بنفس الوقت).
+        _ticker?.cancel();
         if (!_revealed) {
           SoundService.instance.playTimeUp();
           HapticFeedback.mediumImpact();
