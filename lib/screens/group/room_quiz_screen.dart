@@ -9,6 +9,7 @@ import '../../services/sound_service.dart';
 import '../../widgets/option_button.dart';
 import '../../widgets/clock_countdown.dart';
 import 'room_results_screen.dart';
+import 'standings_screen.dart';
 
 class RoomQuizScreen extends StatefulWidget {
   final String code;
@@ -31,10 +32,14 @@ class RoomQuizScreen extends StatefulWidget {
 }
 
 // مدة انتظار ثابتة بعد إجابة الجميع أو انتهاء الوقت، حتى يقدر كل لاعب
-// يشوف الإجابة الصحيحة ويقرأ السبب قبل ما ننتقل للسؤال التالي — بدونها
-// كان الانتقال يصير فوري (خصوصاً لو غرفة بلاعب وحيد يختبر لحاله)، فما
-// يقدر أحد يشوف شي.
-const int _revealPauseSeconds = 4;
+// يشوف الإجابة الصحيحة ويقرأ السبب، وبعدها يشوف صفحة الترتيب، قبل ما
+// ننتقل للسؤال التالي — بدونها كان الانتقال يصير فوري (خصوصاً لو غرفة
+// بلاعب وحيد يختبر لحاله)، فما يقدر أحد يشوف شي.
+const int _revealPauseSeconds = 6;
+
+// كم ثانية نبيّن تلوين الإجابة الصحيحة/الخاطئة والسبب بمكانه قبل ما ننتقل
+// لصفحة الترتيب المستقلة.
+const Duration _standingsDelay = Duration(seconds: 2);
 
 class _RoomQuizScreenState extends State<RoomQuizScreen> {
   final _roomService = RoomService();
@@ -50,6 +55,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
   DateTime? _questionStarted;
   int _secondsLeft = 0;
   bool _navigatedToResults = false;
+  int? _standingsShownForIndex; // آخر سؤال فُتحت له صفحة الترتيب (يمنع التكرار)
 
   // نحصر القيمة بحدود معقولة دفاعياً — لو وصلت قيمة فاسدة أو غير موجبة
   // (بيانات معطوبة، أو تعديل يدوي على وثيقة الغرفة)، فـ (left).clamp(0,
@@ -99,6 +105,22 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
       _questionStarted = startedAtTs.toDate();
       _restartTicker();
     }
+  }
+
+  /// بعد ما تُكشف الإجابة الصحيحة (بأي طريقة — جاوب اللاعب، أو انتهى الوقت)،
+  /// ننتظر لحظة قصيرة يشوف فيها اللون والسبب بمكانه، ثم نفتح صفحة الترتيب
+  /// المستقلة فوقها. الحارس هنا (_standingsShownForIndex) يمنع فتحها أكثر
+  /// من مرة لنفس السؤال حتى لو تكرر استدعاء build().
+  void _maybeShowStandings() {
+    if (!_revealed || _standingsShownForIndex == _lastSeenIndex) return;
+    _standingsShownForIndex = _lastSeenIndex;
+    final capturedIndex = _lastSeenIndex;
+    Future.delayed(_standingsDelay, () {
+      if (!mounted || _lastSeenIndex != capturedIndex) return;
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => StandingsScreen(code: widget.code, questionIndex: capturedIndex),
+      ));
+    });
   }
 
   void _restartTicker() {
@@ -232,6 +254,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
           }
           final roomData = roomSnap.data!.data()!;
           _onRoomUpdate(roomData);
+          _maybeShowStandings();
 
           if (roomData['status'] == 'finished') {
             return const Center(child: CircularProgressIndicator());
@@ -354,11 +377,10 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
                                 ],
                               ),
                             ),
-                          _Standings(playerDocs: playersSnap.data?.docs ?? []),
                           const Padding(
                             padding: EdgeInsets.only(top: 8),
                             child: Text(
-                              'بانتظار انتقال الجميع للسؤال التالي...',
+                              'بانتظار فتح صفحة الترتيب...',
                               textAlign: TextAlign.center,
                               style: TextStyle(color: Colors.grey),
                             ),
@@ -372,81 +394,6 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
             },
           );
         },
-      ),
-    );
-  }
-}
-
-/// ترتيب اللاعبين الحالي (الاسم والنقاط)، يظهر بعد كل سؤال بأي وضع تسجيل
-/// (الأسرع يفوز أو سباق الوقت) — النقاط تتحدّث لحظياً بمجرد ما المضيف
-/// يحتسبها (closeQuestionAndScore)، فالترتيب هنا يتحدّث تلقائياً بدون أي
-/// إجراء إضافي بفضل أنه مبني على watchPlayers مباشرة.
-class _Standings extends StatelessWidget {
-  final List<QueryDocumentSnapshot<Map<String, dynamic>>> playerDocs;
-
-  const _Standings({required this.playerDocs});
-
-  @override
-  Widget build(BuildContext context) {
-    final players = playerDocs
-        .where((d) => d.data()['left'] != true)
-        .map((d) => (
-              name: d.data()['name'] as String? ?? '',
-              score: (d.data()['score'] as num?)?.toInt() ?? 0,
-            ))
-        .toList()
-      ..sort((a, b) => b.score.compareTo(a.score));
-
-    if (players.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'الترتيب الحالي',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          for (int i = 0; i < players.length; i++)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 22,
-                    child: Text(
-                      '${i + 1}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      players[i].name,
-                      textAlign: TextAlign.right,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    '${players[i].score}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-        ],
       ),
     );
   }
