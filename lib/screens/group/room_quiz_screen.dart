@@ -354,6 +354,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
                                 ],
                               ),
                             ),
+                          _Standings(playerDocs: playersSnap.data?.docs ?? []),
                           const Padding(
                             padding: EdgeInsets.only(top: 8),
                             child: Text(
@@ -371,6 +372,81 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+/// ترتيب اللاعبين الحالي (الاسم والنقاط)، يظهر بعد كل سؤال بأي وضع تسجيل
+/// (الأسرع يفوز أو سباق الوقت) — النقاط تتحدّث لحظياً بمجرد ما المضيف
+/// يحتسبها (closeQuestionAndScore)، فالترتيب هنا يتحدّث تلقائياً بدون أي
+/// إجراء إضافي بفضل أنه مبني على watchPlayers مباشرة.
+class _Standings extends StatelessWidget {
+  final List<QueryDocumentSnapshot<Map<String, dynamic>>> playerDocs;
+
+  const _Standings({required this.playerDocs});
+
+  @override
+  Widget build(BuildContext context) {
+    final players = playerDocs
+        .where((d) => d.data()['left'] != true)
+        .map((d) => (
+              name: d.data()['name'] as String? ?? '',
+              score: (d.data()['score'] as num?)?.toInt() ?? 0,
+            ))
+        .toList()
+      ..sort((a, b) => b.score.compareTo(a.score));
+
+    if (players.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'الترتيب الحالي',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (int i = 0; i < players.length; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 22,
+                    child: Text(
+                      '${i + 1}',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      players[i].name,
+                      textAlign: TextAlign.right,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '${players[i].score}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
