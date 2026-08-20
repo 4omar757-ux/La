@@ -51,7 +51,11 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
   int _secondsLeft = 0;
   bool _navigatedToResults = false;
 
-  int get _duration => widget.questionSeconds;
+  // نحصر القيمة بحدود معقولة دفاعياً — لو وصلت قيمة فاسدة أو غير موجبة
+  // (بيانات معطوبة، أو تعديل يدوي على وثيقة الغرفة)، فـ (left).clamp(0,
+  // _duration) يرمي استثناء لأي قيمة سالبة لـ _duration، وهذا يعطّل العداد
+  // عند كل لاعب بالغرفة (حقل مشترك، مو مجرد خلل عند جهاز واحد).
+  int get _duration => widget.questionSeconds.clamp(5, 120);
 
   @override
   void dispose() {
@@ -105,9 +109,15 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
       final left = (_duration - elapsed).clamp(0, _duration);
       if (mounted) setState(() => _secondsLeft = left);
       if (left <= 0) {
-        SoundService.instance.playTimeUp();
-        HapticFeedback.mediumImpact();
-        if (!_revealed && mounted) setState(() => _revealed = true);
+        // الحارس هنا مهم: التكة (كل 500ms) تستمر تشتغل طول مهلة العرض
+        // الأربع ثواني بعد انتهاء الوقت (لين السؤال التالي يبدأ) — بدون
+        // هذا الشرط كان صوت/اهتزاز "انتهى الوقت" يتكرر حوالي ٨ مرات بدل
+        // مرة وحدة.
+        if (!_revealed) {
+          SoundService.instance.playTimeUp();
+          HapticFeedback.mediumImpact();
+          if (mounted) setState(() => _revealed = true);
+        }
         if (widget.isHost && _closingIndex != _lastSeenIndex) {
           _scheduleClose(_lastSeenIndex);
         }
@@ -158,13 +168,29 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
     } else {
       SoundService.instance.playWrong();
     }
-    await _roomService.submitAnswer(
-      code: widget.code,
-      questionIndex: _lastSeenIndex,
-      playerId: widget.playerId,
-      optionIndex: optionIndex,
-      correct: optionIndex == question.correctIndex,
-    );
+    try {
+      await _roomService.submitAnswer(
+        code: widget.code,
+        questionIndex: _lastSeenIndex,
+        playerId: widget.playerId,
+        optionIndex: optionIndex,
+        correct: optionIndex == question.correctIndex,
+      );
+    } catch (_) {
+      // فشل إرسال الإجابة (مشكلة شبكة مؤقتة مثلاً) — نرجّع الواجهة لحالتها
+      // قبل الإجابة حتى يقدر يحاول مرة ثانية، بدل ما يفتكر إنه جاوب وهو ما
+      // سجّل له شي فعلياً بقاعدة البيانات (خسارة نقاط بصمت).
+      if (mounted) {
+        setState(() {
+          _answeredThisQuestion = false;
+          _selected = null;
+          _revealed = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذر إرسال إجابتك، حاول مرة ثانية')),
+        );
+      }
+    }
   }
 
   @override

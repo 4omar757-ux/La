@@ -92,9 +92,13 @@ class RoomService {
     return code;
   }
 
-  Future<bool> roomExists(String code) async {
+  /// حالة الغرفة الحالية ('lobby'/'playing'/'finished'), أو null لو ما فيه
+  /// غرفة بهذا الكود أصلاً. تُستخدم قبل الانضمام حتى ما يدخل لاعب لغرفة
+  /// المسابقة فيها شغالة أصلاً (يفوت أسئلة سابقة، ويعطّل مسار "الجميع
+  /// جاوبوا" لبقية الجولة) أو انتهت (يعلق بشاشة الانتظار للأبد).
+  Future<String?> getRoomStatus(String code) async {
     final snap = await _db.collection('rooms').doc(code).get();
-    return snap.exists;
+    return snap.data()?['status'] as String?;
   }
 
   Future<void> joinRoom({
@@ -145,10 +149,14 @@ class RoomService {
     required int optionIndex,
     required bool correct,
   }) async {
+    // معرّف الوثيقة نفسه (رقم_السؤال_معرف_اللاعب) هو ما يمنع الإجابة
+    // المكررة — قواعد الأمان تمنع "تعديل" وثيقة إجابة موجودة أصلاً
+    // (allow update: if false)، فمحاولة إرسال ثانية لنفس السؤال ترفضها
+    // Firestore مباشرة بدل ما نسوي قراءة تحقّق منفصلة قبل كل إرسال (كانت
+    // تضيف رحلة شبكة كاملة إضافية قبل كل إجابة، وهذا يهم بالذات بوضع
+    // "الأسرع يفوز" اللي يعتمد على ترتيب وصول الإجابات).
     final ansRef =
         _db.collection('rooms').doc(code).collection('answers').doc('${questionIndex}_$playerId');
-    final existing = await ansRef.get();
-    if (existing.exists) return; // منع الإجابة المكررة على نفس السؤال
     await ansRef.set({
       'questionIndex': questionIndex,
       'playerId': playerId,

@@ -18,19 +18,29 @@ class SectionStatsService {
   SectionStatsService._();
   static final SectionStatsService instance = SectionStatsService._();
 
-  Future<void> recordAnswer({required QuestionSection section, required bool correct}) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final map = await _readAll(prefs);
-      final current = map[section] ?? const SectionStats();
-      map[section] = SectionStats(
-        correct: current.correct + (correct ? 1 : 0),
-        total: current.total + 1,
-      );
-      await _writeAll(prefs, map);
-    } catch (_) {
-      // تجاهل فشل الحفظ؛ ما يعطل اللعب.
-    }
+  // تُسلسِل كل نداءات recordAnswer عبر هذا الـ Future بدل ما تشتغل بالتوازي:
+  // كل نداء عبارة عن قراءة-تعديل-كتابة كاملة لنفس البيانات (بلا قفل)، فلو
+  // صارت نداءين قريبين من بعض (سؤالين جاوبهم المستخدم بسرعة) تشتغل بالتوازي،
+  // الكتابة الثانية ممكن تكتب فوق الأولى وتضيع نقطة من العداد بصمت.
+  Future<void> _writeQueue = Future.value();
+
+  Future<void> recordAnswer({required QuestionSection section, required bool correct}) {
+    final result = _writeQueue.then((_) async {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final map = await _readAll(prefs);
+        final current = map[section] ?? const SectionStats();
+        map[section] = SectionStats(
+          correct: current.correct + (correct ? 1 : 0),
+          total: current.total + 1,
+        );
+        await _writeAll(prefs, map);
+      } catch (_) {
+        // تجاهل فشل الحفظ؛ ما يعطل اللعب.
+      }
+    });
+    _writeQueue = result;
+    return result;
   }
 
   Future<Map<QuestionSection, SectionStats>> all() async {

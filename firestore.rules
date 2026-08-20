@@ -20,8 +20,14 @@ service cloud.firestore {
       allow list: if false;
 
       // إنشاء غرفة: يجب أن يكون uid المُنشئ هو نفسه المُعلن كـ hostPlayerId.
+      // questionSeconds لازم تكون رقم موجب معقول — قيمة صفر أو سالبة تكسر
+      // حساب العداد التنازلي عند كل لاعب بالغرفة (حقل مشترك بالوثيقة، مو
+      // خطأ محلي بجهاز واحد)، والتطبيق نفسه له حماية دفاعية إضافية لهذا،
+      // لكن لا داعي نسمح بقيمة فاسدة تدخل قاعدة البيانات أصلاً.
       allow create: if request.auth != null
-                    && request.resource.data.hostPlayerId == request.auth.uid;
+                    && request.resource.data.hostPlayerId == request.auth.uid
+                    && request.resource.data.questionSeconds > 0
+                    && request.resource.data.questionSeconds <= 300;
 
       // تحديث حالة الغرفة (الانتقال للسؤال التالي، إنهاء المسابقة):
       // يقدر يسويه فقط الجهاز المضيف (صاحب hostPlayerId المسجّل).

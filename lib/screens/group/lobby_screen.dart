@@ -57,6 +57,30 @@ class _LobbyScreenState extends State<LobbyScreen> {
           final status = roomData['status'] as String;
           final scoringType = GroupScoringType.values.byName(roomData['scoringType'] as String);
 
+          if (status == 'finished') {
+            // انضمام متأخر لغرفة انتهت مسابقتها أصلاً (كود قديم مثلاً) —
+            // بدون هذا الشرط تبقى الشاشة عالقة على "بانتظار المضيف" للأبد
+            // لأنها ما تنتقل تلقائياً إلا لما status تصير 'playing'.
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.event_busy_rounded, size: 56, color: Colors.grey),
+                    const SizedBox(height: 12),
+                    const Text('هذي الغرفة انتهت مسابقتها بالفعل', textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
+                      child: const Text('رجوع للرئيسية'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
           if (status == 'playing' && !_navigated) {
             _navigated = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {

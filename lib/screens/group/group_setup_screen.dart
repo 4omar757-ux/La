@@ -99,10 +99,17 @@ class _GroupSetupScreenState extends State<GroupSetupScreen> {
       _error = null;
     });
     try {
-      final exists = await _roomService.roomExists(code);
-      if (!exists) {
+      final status = await _roomService.getRoomStatus(code);
+      if (status == null) {
         setState(() {
           _error = 'ما فيه غرفة بهذا الكود';
+          _busy = false;
+        });
+        return;
+      }
+      if (status != 'lobby') {
+        setState(() {
+          _error = 'هذي الغرفة بدأت المسابقة بالفعل أو انتهت، ما تقدر تنضم لها الحين';
           _busy = false;
         });
         return;

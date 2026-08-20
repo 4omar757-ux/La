@@ -131,6 +131,12 @@ class _SoloScreenState extends State<SoloScreen> {
       _index++;
       _answered = false;
       _selected = null;
+    });
+    // نرجّع _navigatingAway لـ false بعد ما يترسم الإطار الجديد فعلياً، لا
+    // بشكل متزامن هنا — لو رجّعناها فوراً، ضغطة مزدوجة سريعة على "التالي"
+    // (تصل قبل ما فليتر يعيد رسم الواجهة ويعطّل الزر) كانت تخترق الحارس
+    // وتقفز سؤالاً كاملاً بصمت (بدون عرضه أو احتسابه).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _navigatingAway = false;
     });
     _startTimer();
@@ -262,7 +268,12 @@ class _SoloResultsScreenState extends State<_SoloResultsScreen> {
   @override
   Widget build(BuildContext context) {
     final maxScore = widget.total * 10;
-    final isNewBest = _best != null && widget.score >= _best!.score && widget.total == _best!.total;
+    // نقارن بالنسبة المئوية لا بالنقاط الخام، لأن عدد الأسئلة يختلف من
+    // جولة لأخرى (١٠/٢٠/٣٠/٥٠) — مقارنة النقاط الخام مع اشتراط تطابق العدد
+    // بالضبط كانت تخلي "أفضل نتيجة" ما تظهر أبداً تقريباً لأي لاعب يغيّر
+    // عدد الأسئلة، رغم إن أداءه فعلاً أفضل.
+    final currentPercent = maxScore == 0 ? 0.0 : widget.score / maxScore;
+    final isNewBest = _best != null && currentPercent >= _best!.percent;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -286,7 +297,7 @@ class _SoloResultsScreenState extends State<_SoloResultsScreen> {
                   Text(
                     isNewBest
                         ? 'أفضل نتيجة لك بهذا المستوى! 🎉'
-                        : 'أفضل نتيجة سابقة (${widget.difficulty.label}): ${_best!.score} / ${_best!.total * 10}',
+                        : 'أفضل نتيجة سابقة (${widget.difficulty.label}): ${(_best!.percent * 100).round()}٪',
                     style: TextStyle(
                       fontSize: 14,
                       color: isNewBest ? Colors.amber.shade800 : Colors.grey,
