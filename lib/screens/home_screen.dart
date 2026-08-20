@@ -6,8 +6,11 @@ import 'settings_screen.dart';
 import 'mode_explanation_screen.dart';
 import '../services/room_service.dart';
 
-const _darkBg = Color(0xFF1D1B18);
-const _surface2 = Color(0xFF33302C);
+// نفس ألوان أيقونة التطبيق بالضبط: الكريمي الفاتح خلفية، والأخضر الغامق
+// (لون حرف "ق" بالشعار) هو لون التمييز — بدل الخلفية الغامقة والألوان
+// المتفرقة (بنفسجي، ذهبي، أحمر-بني) اللي ما لها علاقة بهوية الشعار.
+const _bg = Color(0xFFFFF7EA);
+const _surface2 = Color(0xFFE6DED3);
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -70,21 +73,19 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _darkBg,
+      backgroundColor: _bg,
       appBar: AppBar(
-        backgroundColor: _darkBg,
+        backgroundColor: _bg,
         elevation: 0,
         title: Image.asset(
           'assets/branding/qaf_logo.png',
           height: 30,
-          color: Colors.white,
-          colorBlendMode: BlendMode.srcIn,
         ),
         actions: [
           IconButton(
             icon: const CircleAvatar(
               backgroundColor: _surface2,
-              child: Icon(Icons.settings_rounded, size: 18, color: Color(0xFFE7B24B)),
+              child: Icon(Icons.settings_rounded, size: 18, color: Color(0xFF2B4C3F)),
             ),
             tooltip: 'الإعدادات',
             onPressed: () {
@@ -103,13 +104,13 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: _KeyTile(
-                    color: const Color(0xFF2E5339),
+                    color: const Color(0xFF477C68),
                     icon: Icons.bolt_rounded,
                     label: 'الأسرع',
                     onTap: () => _openExplanation(
                       context,
                       icon: Icons.bolt_rounded,
-                      color: const Color(0xFF2E5339),
+                      color: const Color(0xFF477C68),
                       title: 'الأسرع يفوز',
                       steps: const [
                         'يدخل جميع اللاعبين نفس الغرفة، ويشوفون نفس السؤال بنفس اللحظة.',
@@ -120,16 +121,16 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(width: 2, color: _darkBg),
+                Container(width: 2, color: _bg),
                 Expanded(
                   child: _KeyTile(
-                    color: const Color(0xFF8A3B2B),
+                    color: const Color(0xFF376150),
                     icon: Icons.timer_rounded,
                     label: 'الوقت',
                     onTap: () => _openExplanation(
                       context,
                       icon: Icons.timer_rounded,
-                      color: const Color(0xFF8A3B2B),
+                      color: const Color(0xFF376150),
                       title: 'سباق الوقت',
                       steps: const [
                         'يدخل جميع اللاعبين نفس الغرفة ويشوفون نفس السؤال بنفس اللحظة.',
@@ -143,19 +144,19 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
-          Container(height: 2, color: _darkBg),
+          Container(height: 2, color: _bg),
           Expanded(
             child: Row(
               children: [
                 Expanded(
                   child: _KeyTile(
-                    color: const Color(0xFF5B3E7A),
+                    color: const Color(0xFF2B4C3F),
                     icon: Icons.person_rounded,
                     label: 'فردي',
                     onTap: () => _openExplanation(
                       context,
                       icon: Icons.person_rounded,
-                      color: const Color(0xFF5B3E7A),
+                      color: const Color(0xFF2B4C3F),
                       title: 'اللعب الفردي',
                       steps: const [
                         'تلعب لحالك بدون منافسين.',
@@ -166,16 +167,16 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(width: 2, color: _darkBg),
+                Container(width: 2, color: _bg),
                 Expanded(
                   child: _KeyTile(
-                    color: const Color(0xFFB98424),
+                    color: const Color(0xFF20372E),
                     icon: Icons.public_rounded,
                     label: 'أونلاين',
                     onTap: () => _openExplanation(
                       context,
                       icon: Icons.public_rounded,
-                      color: const Color(0xFFB98424),
+                      color: const Color(0xFF20372E),
                       title: 'مجموعة عبر الإنترنت',
                       steps: const [
                         'أنشئ غرفة أو انضم لغرفة بكود مشترك من أي مكان.',
