@@ -56,9 +56,15 @@ service cloud.firestore {
       match /answers/{answerId} {
         allow read: if request.auth != null;
 
-        // كل لاعب يقدر يرسل إجابة باسمه هو فقط.
+        // كل لاعب يقدر يرسل إجابة باسمه هو فقط، وعلى وثيقة معرّفها بالضبط
+        // "رقم_السؤال_معرف_اللاعب" — هذا يمنع لاعب من إرسال أكثر من إجابة
+        // واحدة لنفس السؤال بمعرّفات وثائق مختلفة (لو سمحنا بذلك، جهاز
+        // المضيف يحسب النقاط لكل وثيقة إجابة يجدها، فيقدر لاعب يضاعف نقاطه
+        // بإرسال إجابتين "صحيحتين" لنفس السؤال). أي محاولة ثانية لنفس
+        // المعرّف تصير "تعديل" لا "إنشاء" وتُرفض بالقاعدة اللي بعدها.
         allow create: if request.auth != null
-                      && request.resource.data.playerId == request.auth.uid;
+                      && request.resource.data.playerId == request.auth.uid
+                      && answerId == string(request.resource.data.questionIndex) + '_' + request.auth.uid;
 
         // الإجابات لا تُعدّل ولا تُحذف بعد إرسالها (يمنع الغش بتغيير إجابة
         // بعد رؤية النتيجة).
