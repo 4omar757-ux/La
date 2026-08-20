@@ -175,9 +175,12 @@ class RoomService {
         .snapshots();
   }
 
-  /// يُستدعى من جهاز المضيف فقط بعد انتهاء وقت السؤال الحالي: يحسب نقاط كل
-  /// لاعب حسب نوع التسجيل، ثم ينتقل للسؤال التالي أو ينهي المسابقة.
-  Future<void> closeQuestionAndScore({
+  /// يُستدعى من جهاز المضيف فقط بمجرد ما ينكشف السؤال الحالي (الجميع جاوبوا
+  /// أو انتهى الوقت): يحسب نقاط كل لاعب حسب نوع التسجيل. لا ينتقل للسؤال
+  /// التالي — هذا مفصول عمداً بـ advanceQuestion() اللي المضيف يستدعيها
+  /// بنفسه بضغطة زر بصفحة الترتيب، حتى ما ينتقل أحد للسؤال التالي إلا من
+  /// عند المضيف صراحة.
+  Future<void> tallyScores({
     required String code,
     required int questionIndex,
     required GroupScoringType scoringType,
@@ -216,6 +219,12 @@ class RoomService {
       await batch.commit();
     }
 
+  }
+
+  /// يُستدعى من جهاز المضيف فقط، بضغطة زر صريحة (زر "السؤال التالي" أو
+  /// "إنهاء المسابقة" بصفحة الترتيب) — ينتقل للسؤال التالي أو ينهي
+  /// المسابقة لو كان هذا آخر سؤال. لا يصير تلقائياً بمجرد مرور وقت معيّن.
+  Future<void> advanceQuestion({required String code, required int questionIndex}) async {
     final roomSnap = await _db.collection('rooms').doc(code).get();
     final questionIds = List<String>.from(roomSnap.data()!['questionIds'] as List);
     if (questionIndex >= questionIds.length - 1) {

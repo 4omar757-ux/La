@@ -31,14 +31,9 @@ class RoomQuizScreen extends StatefulWidget {
   State<RoomQuizScreen> createState() => _RoomQuizScreenState();
 }
 
-// مدة انتظار ثابتة بعد إجابة الجميع أو انتهاء الوقت، حتى يقدر كل لاعب
-// يشوف الإجابة الصحيحة ويقرأ السبب، وبعدها يشوف صفحة الترتيب، قبل ما
-// ننتقل للسؤال التالي — بدونها كان الانتقال يصير فوري (خصوصاً لو غرفة
-// بلاعب وحيد يختبر لحاله)، فما يقدر أحد يشوف شي.
-const int _revealPauseSeconds = 6;
-
 // كم ثانية نبيّن تلوين الإجابة الصحيحة/الخاطئة والسبب بمكانه قبل ما ننتقل
-// لصفحة الترتيب المستقلة.
+// لصفحة الترتيب المستقلة. الانتقال للسؤال التالي بعدها لم يعد تلقائياً —
+// المضيف هو من يبدأه صراحة بضغطة زر بصفحة الترتيب.
 const Duration _standingsDelay = Duration(seconds: 2);
 
 class _RoomQuizScreenState extends State<RoomQuizScreen> {
@@ -111,14 +106,19 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
   /// ننتظر لحظة قصيرة يشوف فيها اللون والسبب بمكانه، ثم نفتح صفحة الترتيب
   /// المستقلة فوقها. الحارس هنا (_standingsShownForIndex) يمنع فتحها أكثر
   /// من مرة لنفس السؤال حتى لو تكرر استدعاء build().
-  void _maybeShowStandings() {
+  void _maybeShowStandings(int totalQuestions) {
     if (!_revealed || _standingsShownForIndex == _lastSeenIndex) return;
     _standingsShownForIndex = _lastSeenIndex;
     final capturedIndex = _lastSeenIndex;
     Future.delayed(_standingsDelay, () {
       if (!mounted || _lastSeenIndex != capturedIndex) return;
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => StandingsScreen(code: widget.code, questionIndex: capturedIndex),
+        builder: (_) => StandingsScreen(
+          code: widget.code,
+          questionIndex: capturedIndex,
+          isHost: widget.isHost,
+          isLastQuestion: capturedIndex >= totalQuestions - 1,
+        ),
       ));
     });
   }
@@ -150,7 +150,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
           if (mounted) setState(() => _revealed = true);
         }
         if (widget.isHost && _closingIndex != _lastSeenIndex) {
-          _scheduleClose(_lastSeenIndex);
+          _tallyOnce(_lastSeenIndex);
         }
       } else {
         SoundService.instance.playTick();
@@ -159,15 +159,13 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
     });
   }
 
-  /// يعلّم السؤال الحالي "بصدد الإغلاق" فوراً (حتى ما نكرر الاستدعاء من
-  /// إعادة رسم الواجهة المتكررة)، بس يأخر الإغلاق الفعلي (الانتقال للسؤال
-  /// التالي) بمقدار [_revealPauseSeconds] حتى يقدر الجميع يشوفون الإجابة
-  /// الصحيحة والسبب أول.
-  Future<void> _scheduleClose(int index) async {
+  /// يعلّم السؤال الحالي "بصدد الاحتساب" فوراً (حتى ما نكرر الاستدعاء من
+  /// إعادة رسم الواجهة المتكررة)، ثم يحسب نقاط اللاعبين لهذا السؤال مباشرة.
+  /// الانتقال للسؤال التالي لم يعد يصير هنا تلقائياً بعد مهلة — المضيف هو
+  /// من يبدأه صراحة بضغطة زر بصفحة الترتيب (StandingsScreen.advanceQuestion).
+  Future<void> _tallyOnce(int index) async {
     _closingIndex = index;
-    await Future.delayed(const Duration(seconds: _revealPauseSeconds));
-    if (!mounted || _closingIndex != index) return;
-    await _roomService.closeQuestionAndScore(
+    await _roomService.tallyScores(
       code: widget.code,
       questionIndex: index,
       scoringType: widget.scoringType,
@@ -182,7 +180,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
     if (_closingIndex == _lastSeenIndex) return;
     if (playerCount > 0 && answers.length >= playerCount) {
       if (!_revealed && mounted) setState(() => _revealed = true);
-      await _scheduleClose(_lastSeenIndex);
+      await _tallyOnce(_lastSeenIndex);
     }
   }
 
@@ -254,13 +252,13 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
           }
           final roomData = roomSnap.data!.data()!;
           _onRoomUpdate(roomData);
-          _maybeShowStandings();
+          final questionIds = List<String>.from(roomData['questionIds'] as List);
+          _maybeShowStandings(questionIds.length);
 
           if (roomData['status'] == 'finished') {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final questionIds = List<String>.from(roomData['questionIds'] as List);
           final index = roomData['currentIndex'] as int;
           if (index < 0 || index >= questionIds.length) {
             return const Center(child: CircularProgressIndicator());

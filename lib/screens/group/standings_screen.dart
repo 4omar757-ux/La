@@ -4,14 +4,24 @@ import '../../services/room_service.dart';
 
 /// صفحة مستقلة تظهر بعد كل سؤال (بأي نظام تسجيل نقاط) تسرد كل لاعب باسمه
 /// ونقاطه مرتبة تنازلياً. تُفتح فوق RoomQuizScreen وتُغلق نفسها تلقائياً
-/// بمجرد ما رقم السؤال الحالي بالغرفة يتغيّر (المضيف انتقل للسؤال التالي)
-/// أو تنتهي المسابقة — الشاشة اللي تحتها (RoomQuizScreen) أصلاً تتولى
-/// عرض السؤال الجديد أو الانتقال لشاشة النتائج النهائية بمجرد ما تنكشف.
+/// بمجرد ما رقم السؤال الحالي بالغرفة يتغيّر أو تنتهي المسابقة — لكن هذا
+/// التغيير نفسه لم يعد يصير تلقائياً بعد مهلة: المضيف فقط هو من يبدأه
+/// صراحة بضغط زر "السؤال التالي"/"إنهاء المسابقة" بالأسفل. بقية اللاعبين
+/// يشوفون رسالة انتظار بدل الزر، وتنتقل شاشتهم تلقائياً بمجرد ما المضيف
+/// يضغط (عبر نفس آلية الإغلاق التلقائي أعلاه).
 class StandingsScreen extends StatefulWidget {
   final String code;
   final int questionIndex;
+  final bool isHost;
+  final bool isLastQuestion;
 
-  const StandingsScreen({super.key, required this.code, required this.questionIndex});
+  const StandingsScreen({
+    super.key,
+    required this.code,
+    required this.questionIndex,
+    required this.isHost,
+    required this.isLastQuestion,
+  });
 
   @override
   State<StandingsScreen> createState() => _StandingsScreenState();
@@ -20,6 +30,7 @@ class StandingsScreen extends StatefulWidget {
 class _StandingsScreenState extends State<StandingsScreen> {
   final _roomService = RoomService();
   bool _popped = false;
+  bool _advancing = false;
 
   void _maybeGoBack(Map<String, dynamic> roomData) {
     if (_popped) return;
@@ -30,6 +41,21 @@ class _StandingsScreenState extends State<StandingsScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && Navigator.of(context).canPop()) Navigator.of(context).pop();
       });
+    }
+  }
+
+  Future<void> _onAdvancePressed() async {
+    if (_advancing) return;
+    setState(() => _advancing = true);
+    try {
+      await _roomService.advanceQuestion(code: widget.code, questionIndex: widget.questionIndex);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _advancing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذر الانتقال، حاول مرة ثانية')),
+        );
+      }
     }
   }
 
@@ -99,11 +125,23 @@ class _StandingsScreenState extends State<StandingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'بانتظار انتقال الجميع للسؤال التالي...',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
-                    ),
+                    if (widget.isHost)
+                      FilledButton(
+                        onPressed: _advancing ? null : _onAdvancePressed,
+                        child: Text(
+                          _advancing
+                              ? '...'
+                              : widget.isLastQuestion
+                                  ? 'إنهاء المسابقة'
+                                  : 'السؤال التالي',
+                        ),
+                      )
+                    else
+                      const Text(
+                        'بانتظار المضيف للانتقال للسؤال التالي...',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
                   ],
                 ),
               );
