@@ -253,7 +253,19 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
               return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: _roomService.watchAnswers(widget.code, index),
                 builder: (context, answersSnap) {
-                  final answered = answersSnap.data?.docs ?? [];
+                  // فلترة صريحة على questionIndex بدل الاعتماد فقط على شرط
+                  // where() بجانب Firestore: StreamBuilder ما يصفّر بياناته
+                  // فوراً لما تتغيّر قيمة stream — يفضل يعرض آخر نتيجة من
+                  // الاستعلام القديم (إجابات السؤال السابق) لحظات قبل ما
+                  // يوصل أول رد فعلي للاستعلام الجديد. لو السؤال السابق
+                  // كان "الجميع جاوبوا"، هذي اللحظة القصيرة كانت كافية
+                  // تخلي _checkAllAnswered يفتكر السؤال الجديد "خلص" فوراً
+                  // بإجابات السؤال القديم، ويسكّره قبل ما اللاعب يشوفه
+                  // أصلاً (بالضبط اللي ظهر بفيديو المستخدم: سؤال جديد
+                  // بعداد وقت كامل لكن معروض كأنه انتهى وقته من أول لحظة).
+                  final answered = (answersSnap.data?.docs ?? [])
+                      .where((d) => d.data()['questionIndex'] == index)
+                      .toList();
                   if (widget.isHost) {
                     _checkAllAnswered(answered, playerCount);
                   }
