@@ -286,6 +286,20 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
                           textAlign: TextAlign.right,
                         ),
                         const SizedBox(height: 24),
+                        if (_revealed && !_answeredThisQuestion)
+                          // نبيّن هذا النص قبل الخيارات لا بعدها — لو ظهر
+                          // بعد الخيارات، اللاعب يشوف الخيار الصحيح متلوّن
+                          // أخضر أول شي بدون أي توضيح، ويبان كأن التطبيق
+                          // "جاوب من نفسه" بدل ما يفهم إنه هذا بس عرض
+                          // للإجابة الصحيحة لأنه ما جاوب بالوقت.
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 10),
+                            child: Text(
+                              'انتهى الوقت قبل ما تجاوب — هذي كانت الإجابة الصحيحة:',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         for (int i = 0; i < question.options.length; i++) ...[
                           OptionButton(
                             label: question.options[i],
@@ -301,15 +315,6 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
                           const SizedBox(height: 12),
                         ],
                         if (_revealed) ...[
-                          if (!_answeredThisQuestion)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 4, bottom: 8),
-                              child: Text(
-                                'انتهى الوقت قبل ما تجاوب',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                              ),
-                            ),
                           if (question.explanation != null)
                             Container(
                               width: double.infinity,

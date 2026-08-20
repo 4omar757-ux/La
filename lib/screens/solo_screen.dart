@@ -173,6 +173,18 @@ class _SoloScreenState extends State<SoloScreen> {
               textAlign: TextAlign.right,
             ),
             const SizedBox(height: 28),
+            if (_answered && _selected == null)
+              // نبيّنه قبل الخيارات لا بعدها، حتى ما يبان الخيار الصحيح
+              // متلوّن أخضر بدون أي توضيح كأن التطبيق "جاوب من نفسه" —
+              // هذا بس عرض للإجابة الصحيحة لأن الوقت انتهى بدون إجابة.
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Text(
+                  'انتهى الوقت قبل ما تجاوب — هذي كانت الإجابة الصحيحة:',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                ),
+              ),
             for (int i = 0; i < question.options.length; i++) ...[
               OptionButton(
                 label: question.options[i],
