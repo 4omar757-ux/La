@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../models/question.dart';
 import '../../services/room_service.dart';
-import '../../widgets/leaderboard.dart';
+import '../../widgets/podium.dart';
 import 'lobby_screen.dart';
 
 class RoomResultsScreen extends StatefulWidget {
@@ -84,59 +84,59 @@ class _RoomResultsScreenState extends State<RoomResultsScreen> {
           }
           final entries = snap.data!.docs.map((d) {
             final data = d.data();
-            return LeaderboardEntry(
+            return PodiumEntry(
               name: data['name'] as String,
               score: (data['score'] as num?)?.toInt() ?? 0,
             );
           }).toList();
-          return Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Icon(Icons.emoji_events_rounded, size: 64, color: Colors.amber),
-                const SizedBox(height: 8),
-                const Text(
-                  'انتهت المسابقة!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          return Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  child: PodiumBoard(entries: entries),
                 ),
-                const SizedBox(height: 24),
-                Leaderboard(entries: entries),
-                const SizedBox(height: 24),
-                if (widget.isHost) ...[
-                  ElevatedButton(
-                    onPressed: _creatingNewRoom ? null : _playAgain,
-                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                    child: _creatingNewRoom
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Text('غرفة جديدة بنفس الإعدادات'),
-                  ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 8),
-                    Text(_error!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
-                  ],
-                  const SizedBox(height: 12),
-                ] else
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      'اطلب من المضيف كود غرفة جديدة لو تبون تلعبون مرة ثانية',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (widget.isHost) ...[
+                      ElevatedButton(
+                        onPressed: _creatingNewRoom ? null : _playAgain,
+                        style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                        child: _creatingNewRoom
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Text('غرفة جديدة بنفس الإعدادات'),
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 8),
+                        Text(_error!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
+                      ],
+                      const SizedBox(height: 12),
+                    ] else
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          'اطلب من المضيف كود غرفة جديدة لو تبون تلعبون مرة ثانية',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    OutlinedButton(
+                      onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
+                      style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                      child: const Text('رجوع للرئيسية'),
                     ),
-                  ),
-                OutlinedButton(
-                  onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
-                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                  child: const Text('رجوع للرئيسية'),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),
