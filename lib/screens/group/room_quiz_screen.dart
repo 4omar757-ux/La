@@ -157,6 +157,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
 
   Future<void> _onAnswer(int optionIndex, Question question) async {
     if (_revealed) return;
+    final answeredIndex = _lastSeenIndex;
     final correct = optionIndex == question.correctIndex;
     setState(() {
       _answeredThisQuestion = true;
@@ -171,7 +172,7 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
     try {
       await _roomService.submitAnswer(
         code: widget.code,
-        questionIndex: _lastSeenIndex,
+        questionIndex: answeredIndex,
         playerId: widget.playerId,
         optionIndex: optionIndex,
         correct: optionIndex == question.correctIndex,
@@ -179,8 +180,11 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
     } catch (_) {
       // فشل إرسال الإجابة (مشكلة شبكة مؤقتة مثلاً) — نرجّع الواجهة لحالتها
       // قبل الإجابة حتى يقدر يحاول مرة ثانية، بدل ما يفتكر إنه جاوب وهو ما
-      // سجّل له شي فعلياً بقاعدة البيانات (خسارة نقاط بصمت).
-      if (mounted) {
+      // سجّل له شي فعلياً بقاعدة البيانات (خسارة نقاط بصمت). لكن فقط لو
+      // لسه بنفس السؤال — لو الفشل وصل متأخر بعد ما الغرفة انتقلت لسؤال
+      // ثاني (كل لاعبين جاوبوا وسكّر المضيف الجولة قبل ما يرجع لنا رد فعل
+      // الشبكة)، ما نرجّع نلمس حالة سؤال مختلف تماماً عن اللي فشل فعلاً.
+      if (mounted && _lastSeenIndex == answeredIndex) {
         setState(() {
           _answeredThisQuestion = false;
           _selected = null;
