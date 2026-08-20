@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'services/firebase_status.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_transition_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -42,7 +42,7 @@ class MasabaqaApp extends StatelessWidget {
           child: child!,
         );
       },
-      home: const HomeScreen(),
+      home: const SplashTransitionScreen(),
     );
   }
 }
