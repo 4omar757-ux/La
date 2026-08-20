@@ -249,7 +249,12 @@ class _RoomQuizScreenState extends State<RoomQuizScreen> {
                     _checkAllAnswered(answered, playerCount);
                   }
 
-                  return Padding(
+                  // SingleChildScrollView ضروري هنا: أسئلة قياس نصها أطول
+                  // بكثير من الأسئلة القديمة (جمل كاملة أحياناً)، فمع ٤
+                  // خيارات + لوحة "السبب" بعد الإجابة، المحتوى يفيض عن
+                  // الشاشة بسهولة على أغلب الجوالات — بدون تمرير، اللاعب
+                  // ما يقدر يشوف السبب أو حتى كل الخيارات.
+                  return SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
